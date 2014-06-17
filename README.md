@@ -28,3 +28,20 @@ Design decisions:
 6.  the database is object oriented (no SQL)
 
 
+Content of the packages:
+------------------------
+
+*  pIoT: contains the xml description of the server
+*  pIoT.client: contains the client side of the server, that is, the web UI
+*  pIoT.client.services: the definition of the interfaces of the client-server functionalities, and the asynchronous methods, as dictated by GWT
+*  pIoT.client.events: client side custom events, used to make parts of the application communicate to each other
+*  pIoT.server: server side implementation of the services
+*  pIoT.shared: shared classes between server and client side, all classes here have to be serializable, and is some cases annotated with @Reflectable
+*  pIoT.shared.messages: messages sent by nodes
+*  pIoT.shared.actions: actions triggered at the server
+
+
+extra folders:
+*  libs: contains external libraries used
+*  war: contains the content of the compiled servlet packages
+
