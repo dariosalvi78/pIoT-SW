@@ -1,0 +1,2 @@
+serviceClass: pIoT.client.services.DBService
+path: E116E1C9AE3DDCAC852D7E7CC81313A7.gwt.rpc

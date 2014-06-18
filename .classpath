@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="test-classes" path="test"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/jssc.jar"/>
+	<classpathentry kind="lib" path="libs/db4o-8.0.249.16098-all-java5.jar" sourcepath="D:/Libraries/Java/db4o-8.0/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/D:/Libraries/Java/db4o-8.0/doc/api/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/gwtent.jar"/>
+	<classpathentry kind="lib" path="libs/gson-2.2.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>

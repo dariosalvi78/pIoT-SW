@@ -1,0 +1,2 @@
+serviceClass: pIoT.client.services.SerialService
+path: BB81D772366354246C007B1D958047E0.gwt.rpc
