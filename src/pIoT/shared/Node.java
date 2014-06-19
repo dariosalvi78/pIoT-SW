@@ -18,13 +18,15 @@ package pIoT.shared;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.dt.reflector.client.Reflectable;
+
 /**
  * Representation of a device.
  * @author Dario Salvi
  *
  */
 @SuppressWarnings("serial")
-public class Node implements Serializable{
+public class Node implements Serializable, Reflectable{
 
 	/**
 	 * The address of the device.

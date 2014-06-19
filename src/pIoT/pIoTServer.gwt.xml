@@ -18,7 +18,7 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-  <inherits name='com.gwtent.GwtEnt'/>
+  <inherits name='org.dt.reflector.Reflector'/>
   
   <!-- Specify the app entry point class.                         -->
   <entry-point class='pIoT.client.pIoTsever'/>
@@ -29,6 +29,5 @@
 
   <!-- allow Super Dev Mode -->
   <add-linker name="xsiframe"/>
-  
-  <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+
 </module>

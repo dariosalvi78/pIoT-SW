@@ -10,7 +10,6 @@
 			<attribute name="javadoc_location" value="file:/D:/Libraries/Java/db4o-8.0/doc/api/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/gwtent.jar"/>
 	<classpathentry kind="lib" path="libs/gson-2.2.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>

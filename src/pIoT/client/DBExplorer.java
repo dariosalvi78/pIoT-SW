@@ -18,6 +18,9 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dt.reflector.client.PropertyUtils;
+import org.dt.reflector.client.Reflector;
+
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
 import pIoT.client.services.DBService;
@@ -50,11 +53,6 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.gwtent.reflection.client.ArrayType;
-import com.gwtent.reflection.client.ClassType;
-import com.gwtent.reflection.client.Field;
-import com.gwtent.reflection.client.Method;
-import com.gwtent.reflection.client.TypeOracle;
 
 /**
  * A generic visualiser of {@link DataMessage}, it uses client-side reflection
@@ -84,6 +82,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 	String currentClass = null;
 
 	public DBExplorer() {
+		
 		mainPanel.getElement().getStyle().setMargin(10, Unit.PX);
 
 		mainPanel.addWest(datamenu, 100);
@@ -311,6 +310,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 		layout.setCellSpacing(5);
 
 		Class<?> clazz = message.getClass();
+		
 		ClassType<?> msgclz = TypeOracle.Instance.getClassType(clazz);
 		String className = msgclz.getName();
 		className = className.substring(className.lastIndexOf('.')+1);
@@ -378,6 +378,10 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 	private void setFieldRows(FlexTable layout, Object message, ClassType<?> clazz){
 		int fieldN = 1;
+		
+		Reflector refl = PropertyUtils.getReflector(clazz);
+		refl.list(message);
+		
 		for(Field f : clazz.getFields()){
 			String fieldName = f.getName();
 			com.gwtent.reflection.client.Type fieldtype = f.getType();

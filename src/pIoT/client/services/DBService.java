@@ -55,7 +55,7 @@ public interface DBService extends RemoteService {
 	 * if -1 it is ignored
 	 * @return a list, ordered by time in descending way
 	 */
-	ArrayList<DataMessage> getDataMessages(String className, String deviceName, int limitstart, int limitend) throws DataBaseException, ClassNotFoundException, IllegalArgumentException;
+	ArrayList<DataMessage> getDataMessages(String className, String deviceName, int limitstart, int limitend) throws DataBaseException, IllegalArgumentException;
 	
 	/**
 	 * Retrieves all the devices in the DB.
