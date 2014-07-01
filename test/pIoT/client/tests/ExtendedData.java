@@ -4,12 +4,11 @@ import java.util.ArrayList;
 
 import org.dt.reflector.client.Reflectable;
 
-import pIoT.shared.ReflectableList;
 
 public class ExtendedData implements Reflectable{
 	private boolean aBool;
 	private int[] anArray;
-	private ReflectableList aList = new ReflectableList();
+	private ArrayList<Integer> aList = new ArrayList<Integer>();
 	
 	public ExtendedData(){
 		
@@ -23,11 +22,11 @@ public class ExtendedData implements Reflectable{
 		this.aBool = aBool;
 	}
 
-	public ReflectableList getAList() {
+	public ArrayList<Integer> getAList() {
 		return aList;
 	}
 
-	public void setAList(ReflectableList aList) {
+	public void setAList(ArrayList<Integer> aList) {
 		this.aList = aList;
 	}
 

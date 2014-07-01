@@ -23,7 +23,6 @@ import java.util.List;
 import org.dt.reflector.client.PropertyUtils;
 import org.dt.reflector.client.Reflector;
 
-import pIoT.shared.ReflectableList;
 import pIoT.shared.messages.DataMessage;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -64,11 +63,11 @@ public class TestReflection extends GWTTestCase {
 		ExtendedData ed = new ExtendedData();
 		ed.setABool(true);
 		ed.setAnArray(new int[]{1,2,3,4});
-		ReflectableList list = new ReflectableList();
-		/*list.add(1);
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		list.add(1);
 		list.add(2);
 		list.add(3);
-		list.add(4);*/
+		list.add(4);
 		ed.setAList(list);
 		ExtendedDataMessage emess = new ExtendedDataMessage(new Date(123456789),
 				"my message", 5, "ext message", ed);
@@ -99,14 +98,12 @@ public class TestReflection extends GWTTestCase {
 		
 		assertTrue(props.contains("aList"));
 		assertNotNull(emd);
-		Object lst = refl.get(emd, "aList");
-		clazz = lst.getClass();
-		refl = PropertyUtils.getReflector(clazz);
-		assertNotNull(refl);
-		props = Arrays.asList(refl.list(lst));
-		System.out.println("PROPS---");
-		for(String prop : props)
-			System.out.println(prop);
-		
+		assertTrue(refl.get(emd, "aList") instanceof List<?>);
+		List<?> lst = (List<?>) refl.get(emd, "aList");
+		assertEquals(4, lst.size());
+		assertEquals(1, lst.get(0));
+		assertEquals(2, lst.get(1));
+		assertEquals(3, lst.get(2));
+		assertEquals(4, lst.get(3));
 	}
 }
