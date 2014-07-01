@@ -56,7 +56,6 @@ public class DashBoard extends Composite implements SectionChangeHandler{
 	public void onSectionChanged(SectionChangeEvent evt) {
 		if(evt.getCurrentSection() == Section.DashBoard){
 			stats.update();
-			System.out.println("section changed");
 		}
 			
 	}

@@ -96,6 +96,7 @@ public class SerialPortSelector extends Composite {
 			}
 			@Override
 			public void onSuccess(ArrayList<String> result) {
+				dropBox.clear();
 				if((result == null) || (result.isEmpty())){
 					dropBox.setEnabled(false);
 					startStopButton.setEnabled(false);
