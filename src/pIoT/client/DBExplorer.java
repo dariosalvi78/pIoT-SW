@@ -14,9 +14,12 @@
  */
 package pIoT.client;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import org.dt.reflector.client.PropertyUtils;
+import org.dt.reflector.client.Reflector;
 
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
@@ -50,11 +53,6 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.gwtent.reflection.client.ArrayType;
-import com.gwtent.reflection.client.ClassType;
-import com.gwtent.reflection.client.Field;
-import com.gwtent.reflection.client.Method;
-import com.gwtent.reflection.client.TypeOracle;
 
 /**
  * A generic visualiser of {@link DataMessage}, it uses client-side reflection
@@ -84,12 +82,13 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 	String currentClass = null;
 
 	public DBExplorer() {
+
 		mainPanel.getElement().getStyle().setMargin(10, Unit.PX);
 
 		mainPanel.addWest(datamenu, 100);
 
 		final HorizontalPanel navigationMenu = new HorizontalPanel();
-		Label devicesLabel = new Label("Select device:");
+		Label devicesLabel = new Label("Device:");
 		devicesLabel.getElement().getStyle().setMarginLeft(5, Unit.PX);
 		navigationMenu.add(devicesLabel);
 
@@ -206,7 +205,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 		initWidget(mainPanel);
 	}
-	
+
 	private void updateDevicesList(){
 		devices.clear();
 		devices.addItem("All");
@@ -311,25 +310,21 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 		layout.setCellSpacing(5);
 
 		Class<?> clazz = message.getClass();
-		ClassType<?> msgclz = TypeOracle.Instance.getClassType(clazz);
-		String className = msgclz.getName();
-		className = className.substring(className.lastIndexOf('.')+1);
+
+		String className = clazz.getSimpleName();
 		layout.setHTML(0, 0, className);
 		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
 		layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
 
-		do{
-			msgclz = TypeOracle.Instance.getClassType(clazz);
-			setFieldRows(layout, message, msgclz);
-			clazz = clazz.getSuperclass();
-		} while((clazz != null) && (! clazz.getName().equals(Object.class.getName())));
+		setFieldRows(layout, message);
+
 
 		decP.add(layout);
 		return decP;
 	}
 
-	private Widget renderPrimitive(String className, Object value){
-		if(className.equals(String.class.getName())) {
+	private Widget renderPrimitive(Object value){
+		if(value instanceof String) { //String
 			String text = (String) value;
 			if((text.length() > 20) || (text.indexOf('\n') != -1)){
 				TextArea ta = new TextArea();
@@ -344,16 +339,16 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 				tb.setReadOnly(true);
 				return tb;
 			}
-		} else if((className.equals(Integer.class.getName()))||
-				(className.equals(int.class.getName()))||
-				(className.equals(Long.class.getName()))||
-				(className.equals(long.class.getName()))||
-				(className.equals(Short.class.getName()))||
-				(className.equals(short.class.getName()))||
-				(className.equals(Float.class.getName()))||
-				(className.equals(float.class.getName()))||
-				(className.equals(Double.class.getName()))||
-				(className.equals(double.class.getName()))){
+		} else if((value instanceof Byte) || //char
+				(value instanceof Character)){
+			Label valueLabel = new Label(value.toString());
+			return valueLabel;
+		}
+		else if((value instanceof Integer) || //numbers
+				(value instanceof Long)||
+				(value instanceof Short)||
+				(value instanceof Float)||
+				(value instanceof Double)){
 			HorizontalPanel hp = new HorizontalPanel();
 			Label number = new Label(value.toString());
 			hp.add(number);
@@ -361,158 +356,109 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 			plot.getElement().getStyle().setMarginLeft(5, Unit.PX);
 			hp.add(plot);
 			return hp;
-		} else if((className.equals(java.util.Date.class.getName())) ||
-				(className.equals(java.sql.Date.class))){
+		} else if(value instanceof Date){ //Dates
 			Label valueLabel = new Label(value.toString());
 			return valueLabel;
-		} else if((className.equals(Boolean.class.getName())) ||
-				(className.equals(boolean.class.getName()))){
+		} else if(value instanceof Boolean){ //Booleans
 			CheckBox cb = new CheckBox();
 			cb.setEnabled(false);
 			cb.setValue((Boolean) value);
 			return cb;
 		} 
-
 		return null;
 	}
 
-	private void setFieldRows(FlexTable layout, Object message, ClassType<?> clazz){
+	private void setFieldRows(FlexTable layout, Object message){
 		int fieldN = 1;
-		for(Field f : clazz.getFields()){
-			String fieldName = f.getName();
-			com.gwtent.reflection.client.Type fieldtype = f.getType();
-			Object fieldValue = f.getFieldValue(message);
-			String typeName = fieldtype.getQualifiedSourceName();
 
+		Class<?> clazz = message.getClass();
+		Reflector refl = PropertyUtils.getReflector(clazz);
+
+		for(String fieldName : refl.list(message)){
+			Object fieldValue = refl.get(message, fieldName);
 			if(fieldValue == null){ //The field is null
 				layout.setHTML(fieldN, 0, fieldName);
 				layout.setWidget(fieldN, 1, new HTML("empty"));
-			} 
-			else if(fieldtype.isArray() != null){ //The field is an array
-				ArrayType fieldArrayType = fieldtype.isArray();
-				String componentTypeName = fieldArrayType.getComponentType().getQualifiedSourceName();
-				int len = Array.getLength(fieldValue);
-				if((componentTypeName.equals(Integer.class.getName()))||
-						(componentTypeName.equals(int.class.getName()))||
-						(componentTypeName.equals(Long.class.getName()))||
-						(componentTypeName.equals(long.class.getName()))||
-						(componentTypeName.equals(Short.class.getName()))||
-						(componentTypeName.equals(short.class.getName()))||
-						(componentTypeName.equals(Float.class.getName()))||
-						(componentTypeName.equals(float.class.getName()))||
-						(componentTypeName.equals(Double.class.getName()))||
-						(componentTypeName.equals(double.class.getName()))||
-						(componentTypeName.equals(java.util.Date.class.getName())) ||
-						(componentTypeName.equals(java.sql.Date.class))||
-						(componentTypeName.equals(Boolean.class.getName())) ||
-						(componentTypeName.equals(boolean.class.getName()))){
-					for(int i=0; i< len; i++){
-						layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
-						layout.setWidget(fieldN, 1, renderPrimitive(componentTypeName, Array.get(fieldValue, i)));
-						fieldN++;
-					}
-				} else {
-					for(int i=0; i< len; i++){
-						DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
-						dp.setAnimationEnabled(true);
-						dp.setContent(renderObject(Array.get(fieldValue, i)));
-						layout.setWidget(fieldN, 0, dp);
-						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-						fieldN++;
-					}
-				}
 			}
-			else if(fieldtype.isPrimitive()!= null){
-				layout.setHTML(fieldN, 0, fieldName);
-				layout.setWidget(fieldN, 1, renderPrimitive(typeName, fieldValue));
-				fieldN++;
-			} else if(fieldtype.isClass() != null){ //The field is a class
-				ClassType<?> fieldclasstype = fieldtype.isClass();
-				
-				if(fieldValue instanceof List){ //The field is a List (do like an array)
-					Method size = fieldclasstype.findMethod("size", Void.class);
-					int len = (int)size.invoke(fieldValue, null);
-					if(len >0){
-						Method get = fieldclasstype.findMethod("get", int.class);
-						String componentTypeName = get.invoke(fieldValue, 0).getClass().getName();
-						if((componentTypeName.equals(Integer.class.getName()))||
-								(componentTypeName.equals(int.class.getName()))||
-								(componentTypeName.equals(Long.class.getName()))||
-								(componentTypeName.equals(long.class.getName()))||
-								(componentTypeName.equals(Short.class.getName()))||
-								(componentTypeName.equals(short.class.getName()))||
-								(componentTypeName.equals(Float.class.getName()))||
-								(componentTypeName.equals(float.class.getName()))||
-								(componentTypeName.equals(Double.class.getName()))||
-								(componentTypeName.equals(double.class.getName()))||
-								(componentTypeName.equals(java.util.Date.class.getName())) ||
-								(componentTypeName.equals(java.sql.Date.class))||
-								(componentTypeName.equals(Boolean.class.getName())) ||
-								(componentTypeName.equals(boolean.class.getName()))){
-							for(int i=0; i< len; i++){
-								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
-								layout.setWidget(fieldN, 1, renderPrimitive(componentTypeName, Array.get(fieldValue, i)));
-								fieldN++;
-							}
-						} else {
-							for(int i=0; i< len; i++){
-								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
-								dp.setAnimationEnabled(true);
-								dp.setContent(renderObject(Array.get(fieldValue, i)));
-								layout.setWidget(fieldN, 0, dp);
-								layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-								fieldN++;
-							}
-						}
-					} else {
-						layout.setHTML(fieldN, 0, fieldName);
-						layout.setWidget(fieldN, 1, new HTML("empty"));
-						fieldN++;
-					}
-				} 
-				//TODO: render collections, iterables?
-				else if(typeName.equals(String.class.getName())) { //The field a String
+			else{ //Field is not null
+				Class<?> fieldclazz = fieldValue.getClass();
+
+				if(fieldclazz.isArray()){ //The field is an array
+					layout.setHTML(fieldN, 0, fieldName);
+					layout.setHTML(fieldN, 0, "cannot parse arrays :(");
+				}
+				else if(fieldclazz.isPrimitive() || //boolean, byte, char, short, int, long, float, and double
+						(fieldValue instanceof Integer) || //numbers
+						(fieldValue instanceof Long)||
+						(fieldValue instanceof Short)||
+						(fieldValue instanceof Float)||
+						(fieldValue instanceof Double)||
+						(fieldValue instanceof Byte)||
+						(fieldValue instanceof Character)||
+						(fieldValue instanceof Date)|| //Date
+						(fieldValue instanceof Boolean) //Booleand
+						){ 
+					layout.setHTML(fieldN, 0, fieldName);
+					layout.setWidget(fieldN, 1, renderPrimitive(fieldValue));
+					fieldN++;
+				}
+				else if(fieldValue instanceof String) { //The field a String
 					String text = (String) fieldValue;
 					if((text.length() > 20) || (text.indexOf('\n') != -1)){
-						DisclosurePanel dp = new DisclosurePanel(f.getName());
+						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
-						dp.setContent(renderPrimitive(typeName, fieldValue));
+						dp.setContent(renderPrimitive(fieldValue));
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
 					} else{
 						layout.setHTML(fieldN, 0, fieldName);
-						layout.setWidget(fieldN, 1, renderPrimitive(typeName, fieldValue));
+						layout.setWidget(fieldN, 1, renderPrimitive(fieldValue));
 					}
 					fieldN++;
-				} else if((typeName.equals(Integer.class.getName()))|| //The field is another supported basic type
-						(typeName.equals(Long.class.getName()))||
-						(typeName.equals(Short.class.getName()))||
-						(typeName.equals(Float.class.getName()))||
-						(typeName.equals(Double.class.getName()))||
-						(typeName.equals(java.util.Date.class.getName())) ||
-						(typeName.equals(java.sql.Date.class))||
-						(typeName.equals(Boolean.class.getName()))){
-					layout.setHTML(fieldN, 0, fieldName);
-					layout.setWidget(fieldN, 1, renderPrimitive(typeName, fieldValue));
-					fieldN++;
-				} 
-				else { //The field should be a complex type
-					DisclosurePanel dp = new DisclosurePanel(fieldName);
-					dp.setAnimationEnabled(true);
-					dp.setContent(renderObject(fieldValue));
-					layout.setWidget(fieldN, 0, dp);
-					layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-					fieldN++;
+				} else { //The field is a complex class
+
+					if(fieldValue instanceof List){ //The field is a List (do like an array)
+						List<?> list = (List<?>) fieldValue;
+						int len = list.size();
+						if(len ==0) {
+							layout.setHTML(fieldN, 0, fieldName);
+							layout.setWidget(fieldN, 1, new HTML("empty"));
+							fieldN++;
+						}
+						for(int i=0; i<len; i++){
+							Object element = list.get(i);
+							Class<?> elementclazz = element.getClass();
+							if(elementclazz.isPrimitive() ||
+									(element instanceof String) ||
+									(element instanceof Date)){
+								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
+								layout.setWidget(fieldN, 1, renderPrimitive(element));
+								fieldN++;
+							} else {
+								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
+								dp.setAnimationEnabled(true);
+								dp.setContent(renderObject(element));
+								layout.setWidget(fieldN, 0, dp);
+								layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
+								fieldN++;
+							}
+						} 
+					}
+					//TODO: render collections, iterables?
+					else { //Generic class rendering
+						DisclosurePanel dp = new DisclosurePanel(fieldName);
+						dp.setAnimationEnabled(true);
+						dp.setContent(renderObject(fieldValue));
+						layout.setWidget(fieldN, 0, dp);
+						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
+						fieldN++;
+					}
 				}
-			} else{ //If it's not a class, nor an array, then I don't know what to do with it
-				layout.setHTML(fieldN, 0, fieldName);
-				layout.setWidget(fieldN, 1, new HTML("Unknown type " + fieldtype.getQualifiedSourceName()));
-				fieldN++;
 			}
 		}
 	}
 
-	
+
 	@Override
 	public void onSectionChanged(SectionChangeEvent evt) {
 		//Refresh devices list that can have changed

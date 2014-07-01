@@ -11,14 +11,15 @@
  * http://www.gnu.org/licenses/gpl-3.0.html
  * 
  * Package containing the interpretation of the messages received by pIoT devices.
- * All these classes have to be Reflectable and serializable.
+ * All these classes have to be Reflectable and Serializable.
  */
 package pIoT.shared.messages;
 
 import java.io.Serializable;
 import java.util.Date;
 
-import com.gwtent.reflection.client.Reflectable;
+import org.dt.reflector.client.Reflectable;
+
 
 /**
  * Base class for representing messages received from pIoT device.
@@ -26,8 +27,7 @@ import com.gwtent.reflection.client.Reflectable;
  *
  */
 @SuppressWarnings("serial")
-@Reflectable
-public class DataMessage implements Serializable {
+public class DataMessage implements Serializable, Reflectable {
 
 	/**
 	 * The time and date the message was received.

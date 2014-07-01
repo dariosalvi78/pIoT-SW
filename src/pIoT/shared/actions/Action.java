@@ -10,20 +10,22 @@
  * License: GNU GENERAL PUBLIC LICENSE Version 3
  * http://www.gnu.org/licenses/gpl-3.0.html
  * 
- * Package that contains actions triggered at the server.
+ * Package that contains actions triggered at the server
+ * Classes have to be {@link Serializable}
+ * and {@link org.dt.reflector.client.Reflectable}
  */
 package pIoT.shared.actions;
 
 import java.io.Serializable;
 
-import com.gwtent.reflection.client.Reflectable;
+import org.dt.reflector.client.Reflectable;
+
 
 /**
  * @author Dario Salvi
  *
  */
-@Reflectable
-public class Action implements Serializable{
+public class Action implements Serializable, Reflectable{
 
 	/**
 	 * 

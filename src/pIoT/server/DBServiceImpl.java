@@ -71,10 +71,15 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
 	@Override
 	public ArrayList<DataMessage> getDataMessages(final String className, final String deviceName, final int limitstart, final int limitend)
-			throws DataBaseException, ClassNotFoundException, IllegalArgumentException {
-		Class<?> clazz = Class.forName(className);
+			throws DataBaseException, IllegalArgumentException {
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			throw new IllegalArgumentException("The class must be a DataMessage");
+		}
 		if(! DataMessage.class.isAssignableFrom(clazz))
-			throw new ClassNotFoundException("The class must be a DataMessage");
+			throw new IllegalArgumentException("The class must be a DataMessage");
 
 		int devAddress = 0;
 		if(deviceName != null){
