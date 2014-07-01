@@ -5,3 +5,4 @@ war/DB
 www-test/
 war/pIoTServer/
 war/deploy/
+war/classes/
