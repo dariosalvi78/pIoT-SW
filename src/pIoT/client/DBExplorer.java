@@ -162,46 +162,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 		scrollable.add(messagesPanel);
 		mainPanel.add(scrollable);
 
-		//Always add All
-		Anchor allLabel = new Anchor("All");
-		allLabel.getElement().getStyle().setMargin(5, Unit.PX);
-		allLabel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				currentClass = DataMessage.class.getName();
-				page = 0;
-				updateContent();
-			}
-		});
-		datamenu.add(allLabel);
-
-		//Add navigation
-
-		DB.getDataMessageClassNames(new AsyncCallback<ArrayList<String>>() {
-
-			@Override
-			public void onSuccess(ArrayList<String> result) {
-				for(final String className : result){
-					if(!className.equals(DataMessage.class.getName())){
-						Anchor classNameLabel = new Anchor(className);
-						classNameLabel.addClickHandler(new ClickHandler() {
-							@Override
-							public void onClick(ClickEvent event) {
-								currentClass = className;
-								page = 0;
-								updateContent();
-							}
-						});
-						datamenu.add(classNameLabel);
-					}
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-				Window.alert("Cannot get stored objects names.\n" + caught.getMessage());
-			}
-		});
+		updateDataMenu();
 
 		initWidget(mainPanel);
 	}
@@ -303,6 +264,50 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 		});
 	}
 
+	private void updateDataMenu(){
+		datamenu.clear();
+		
+		//Always add All
+		Anchor allLabel = new Anchor("All");
+		allLabel.getElement().getStyle().setMargin(5, Unit.PX);
+		allLabel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				currentClass = DataMessage.class.getName();
+				page = 0;
+				updateContent();
+			}
+		});
+		datamenu.add(allLabel);
+
+		//Add navigation
+		DB.getDataMessageClassNames(new AsyncCallback<ArrayList<String>>() {
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+				for(final String className : result){
+					if(!className.equals(DataMessage.class.getName())){
+						Anchor classNameLabel = new Anchor(className);
+						classNameLabel.addClickHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								currentClass = className;
+								page = 0;
+								updateContent();
+							}
+						});
+						datamenu.add(classNameLabel);
+					}
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert("Cannot get stored objects names.\n" + caught.getMessage());
+			}
+		});
+	}
+
 	private Widget renderObject(Object message){
 		DecoratorPanel decP = new DecoratorPanel();
 
@@ -323,7 +328,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 		return decP;
 	}
 
-	private Widget renderPrimitive(Object value){
+	private Widget renderBasicType(Object value){
 		if(value instanceof String) { //String
 			String text = (String) value;
 			if((text.length() > 20) || (text.indexOf('\n') != -1)){
@@ -399,7 +404,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 						(fieldValue instanceof Boolean) //Booleand
 						){ 
 					layout.setHTML(fieldN, 0, fieldName);
-					layout.setWidget(fieldN, 1, renderPrimitive(fieldValue));
+					layout.setWidget(fieldN, 1, renderBasicType(fieldValue));
 					fieldN++;
 				}
 				else if(fieldValue instanceof String) { //The field a String
@@ -407,12 +412,12 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 					if((text.length() > 20) || (text.indexOf('\n') != -1)){
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
-						dp.setContent(renderPrimitive(fieldValue));
+						dp.setContent(renderBasicType(fieldValue));
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
 					} else{
 						layout.setHTML(fieldN, 0, fieldName);
-						layout.setWidget(fieldN, 1, renderPrimitive(fieldValue));
+						layout.setWidget(fieldN, 1, renderBasicType(fieldValue));
 					}
 					fieldN++;
 				} else { //The field is a complex class
@@ -432,7 +437,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 									(element instanceof String) ||
 									(element instanceof Date)){
 								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
-								layout.setWidget(fieldN, 1, renderPrimitive(element));
+								layout.setWidget(fieldN, 1, renderBasicType(element));
 								fieldN++;
 							} else {
 								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
@@ -444,7 +449,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 							}
 						} 
 					}
-					//TODO: render collections, iterables?
+					//TODO: render collections, iterables, maps?
 					else { //Generic class rendering
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
@@ -461,8 +466,9 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 	@Override
 	public void onSectionChanged(SectionChangeEvent evt) {
-		//Refresh devices list that can have changed
+		//Refresh data types and devices list that can have changed
 		updateDevicesList();
+		updateDataMenu();
 	}
 
 }
