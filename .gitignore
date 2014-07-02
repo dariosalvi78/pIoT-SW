@@ -3,6 +3,7 @@
 gwt-unitCache/
 war/DB
 www-test/
+test-classes/
 war/pIoTServer/
-war/deploy/
-war/classes/
+war/WEB-INF/deploy/
+war/WEB-INF/classes/
