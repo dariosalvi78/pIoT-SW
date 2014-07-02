@@ -21,6 +21,8 @@ import pIoT.client.services.SerialService;
 import pIoT.shared.Node;
 import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.HelloMessage;
+import pIoT.shared.messages.LightMessage;
 import pIoT.shared.notifications.NewDeviceNotification;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -49,7 +51,8 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	public SerialServiceImpl(){
 		//Register here all the parseable classes:
 		ObjectParser.addClassType(DataMessage.class);
-		
+		ObjectParser.addClassType(HelloMessage.class);
+		ObjectParser.addClassType(LightMessage.class);
 		
 		portName = Configs.retrieveConfigs().getComPort();
 

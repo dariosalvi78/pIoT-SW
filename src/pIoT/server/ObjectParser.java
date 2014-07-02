@@ -17,6 +17,7 @@ package pIoT.server;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
+import com.google.gwt.core.shared.GWT;
 
 /**
  * Parses a flow of strings into objects, using JSON
@@ -93,6 +94,8 @@ public class ObjectParser {
 							
 							return retVal;
 						} catch(Exception ex){
+							GWT.log("Strange data when parsing from serial", ex);
+							System.out.println("Strange data when parsing from serial:");
 							ex.printStackTrace();
 							//In case of problems, reset and go on
 							inObject = false;

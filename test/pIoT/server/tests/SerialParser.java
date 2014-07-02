@@ -22,6 +22,12 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
+/**
+ * A simple tester that opens a serial port and parses the incoming JSON messages.
+ * Use it with an Arduino to check if the parsing works well.
+ * @author Dario Salvi
+ *
+ */
 public class SerialParser {
 
 	public static void main(String[] args) throws SerialPortException{
