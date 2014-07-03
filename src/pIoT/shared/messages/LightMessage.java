@@ -4,9 +4,9 @@ import java.util.Date;
 
 public class LightMessage extends DataMessage {
 	
-	int intensity;
+	private int intensity;
 	
-	public void LightMessage(){
+	public LightMessage(){
 		
 	}
 	

@@ -46,6 +46,9 @@ public class pIoTsever implements EntryPoint, HasHandlers {
 	
 	public void onModuleLoad() {
 		
+		//Call the Dummy service
+		new DummyClient();
+		
 		// Create a tab panel with the main menu of the server
 		final TabLayoutPanel tbp = new TabLayoutPanel(30, Unit.PX);
 		tbp.setAnimationDuration(1000);
