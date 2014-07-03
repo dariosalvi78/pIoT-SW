@@ -26,16 +26,6 @@
     <url-pattern>/pIoTServer/DB</url-pattern>
   </servlet-mapping>
   
-  <servlet>
-    <servlet-name>DummyServlet</servlet-name>
-    <servlet-class>pIoT.server.DummyServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>DummyServlet</servlet-name>
-    <url-pattern>/pIoTServer/dummy</url-pattern>
-  </servlet-mapping>
-  
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>pIoTServer.html</welcome-file>
