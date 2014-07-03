@@ -28,11 +28,6 @@ public class ObjectParser {
 
 	private static String stringBuffer = "";
 	private static String lastMessage = "";
-	private static int level = 0;
-	private static boolean inObject = false;
-	private static int startObjectIndex = 0;
-	private static int startContentIndex = 0;
-	private static int endContentIndex = 0;
 	
 	private static ArrayList<Class<?>> supportedClasses = new ArrayList<>();
 
@@ -51,24 +46,27 @@ public class ObjectParser {
 	 * @return the instance of a supported class, or null
 	 */
 	public static Object parse(String piece) throws IllegalArgumentException{
-		if((piece == null) || (piece.isEmpty()))
-			return null;
-		int len = stringBuffer.length();
-		stringBuffer += piece;
+		if(piece != null)
+			stringBuffer += piece;
 		
-		for(int i = 0; i < piece.length(); i++){
-			char c = piece.charAt(i);
-			int currentIndexInBuffer = len + i;
+		int level = 0;
+		boolean inObject = false;
+		int startObjectIndex = 0;
+		int startContentIndex = 0;
+		int endContentIndex = 0;
+		
+		for(int i = 0; i < stringBuffer.length(); i++){
+			char c = stringBuffer.charAt(i);
 			if(c=='{'){
 				level++;
 				if(!inObject){
 					//Here we start to be into an object
 					inObject = true;
-					startObjectIndex = currentIndexInBuffer;
+					startObjectIndex = i;
 				}
 				if(level == 2){
 					//Here the content of the object starts
-					startContentIndex = currentIndexInBuffer;
+					startContentIndex = i;
 				}
 			}
 			else if(c=='}'){
@@ -77,7 +75,7 @@ public class ObjectParser {
 					if(inObject){
 						//Gotcha!
 						try{
-							String jsonStr = stringBuffer.substring(startObjectIndex, currentIndexInBuffer +1);
+							String jsonStr = stringBuffer.substring(startObjectIndex, i +1);
 							String dataname = getNameOfJsonObject(jsonStr);
 							String content = stringBuffer.substring(startContentIndex, endContentIndex +1);
 							Class<?> cl = getClassFromSimpleName(dataname);
@@ -90,7 +88,7 @@ public class ObjectParser {
 							startContentIndex = 0;
 							endContentIndex = 0;
 							level = 0;
-							stringBuffer = piece.substring(i+1);
+							stringBuffer = stringBuffer.substring(i+1);
 							
 							return retVal;
 						} catch(Exception ex){
@@ -103,13 +101,13 @@ public class ObjectParser {
 							startContentIndex = 0;
 							endContentIndex = 0;
 							level = 0;
-							stringBuffer = piece.substring(i+1);
+							stringBuffer = stringBuffer.substring(i+1);
 							//break;
 						}
 					}
 				} else if(level == 1){
 					//the content is here
-					endContentIndex = currentIndexInBuffer;
+					endContentIndex = i;
 				}
 				else if(level <0){
 					//This shouldn't happen, we have missed something, let's discard it
@@ -118,7 +116,7 @@ public class ObjectParser {
 					startContentIndex = 0;
 					endContentIndex = 0;
 					level = 0;
-					stringBuffer = piece.substring(i+1);
+					stringBuffer = stringBuffer.substring(i+1);
 					//break;
 				}
 			}
@@ -147,5 +145,9 @@ public class ObjectParser {
 	 */
 	public static String getParsedMessage(){
 		return lastMessage;
+	}
+	
+	public static void reset(){
+		stringBuffer = "";
 	}
 }

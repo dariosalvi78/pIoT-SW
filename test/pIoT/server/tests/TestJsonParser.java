@@ -16,6 +16,7 @@ package pIoT.server.tests;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import pIoT.client.tests.ExtendedDataMessage;
@@ -25,6 +26,11 @@ import pIoT.shared.messages.HelloMessage;
 import pIoT.shared.messages.LightMessage;
 
 public class TestJsonParser {
+	
+	@Before
+	public void setup(){
+		ObjectParser.reset();
+	}
 	
 
 	@Test
@@ -137,6 +143,17 @@ public class TestJsonParser {
 		LightMessage lm = (LightMessage)o;
 		assertEquals(1234, lm.getSourceAddress());
 		assertEquals(246, lm.getIntensity());
+		
+		buff = "Received a mesage of type 0 from node 1234\n"
+			+ "{ \"HelloMessage\": { \"sourceAddress\":1234, \"temperature\":21.36, \"Vcc\":3.09 }}\n"
+			+ "Received a mesage of type 100 from node 1234"
+			+ "{ \"LightMessage\": { \"sourceAddress\":1234, \"intensity\":244 }}\n";
+		o = ObjectParser.parse(buff);
+		assertNotNull(o);
+		assertTrue(o instanceof HelloMessage);
+		o = ObjectParser.parse("");
+		assertNotNull(o);
+		assertTrue(o instanceof LightMessage);
 	}
 	
 	
