@@ -287,7 +287,9 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 			public void onSuccess(ArrayList<String> result) {
 				for(final String className : result){
 					if(!className.equals(DataMessage.class.getName())){
-						Anchor classNameLabel = new Anchor(className);
+						int ix = className.lastIndexOf(".");
+						String reducedName = className.substring(ix + 1);
+						Anchor classNameLabel = new Anchor(reducedName);
 						classNameLabel.addClickHandler(new ClickHandler() {
 							@Override
 							public void onClick(ClickEvent event) {
