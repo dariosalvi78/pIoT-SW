@@ -17,8 +17,6 @@ package pIoT.server.tests;
 
 import pIoT.server.ObjectParser;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.HelloMessage;
-import pIoT.shared.messages.LightMessage;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -34,8 +32,6 @@ public class SerialParser {
 
 	public static void main(String[] args) throws SerialPortException{
 		ObjectParser.addClassType(DataMessage.class);
-		ObjectParser.addClassType(HelloMessage.class);
-		ObjectParser.addClassType(LightMessage.class);
 		
 		final SerialPort port = new SerialPort("COM6");
 		port.openPort();

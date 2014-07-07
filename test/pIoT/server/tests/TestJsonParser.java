@@ -22,8 +22,6 @@ import org.junit.Test;
 import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.server.ObjectParser;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.HelloMessage;
-import pIoT.shared.messages.LightMessage;
 
 public class TestJsonParser {
 	
@@ -112,53 +110,6 @@ public class TestJsonParser {
 		DataMessage m = (DataMessage)o;
 		assertEquals(10, m.getSourceAddress());
 	}
-	
-	@Test
-	public void testParser3(){
-		ObjectParser.addClassType(DataMessage.class);
-		ObjectParser.addClassType(HelloMessage.class);
-		ObjectParser.addClassType(LightMessage.class);
-		
-		String buff = null;
-		assertNull(ObjectParser.parse(buff));
-		buff = "Received a mesage of type 0 from node 1234\n";
-		assertNull(ObjectParser.parse(buff));
-		buff = "{ \"HelloMessage\": { ";
-		assertNull(ObjectParser.parse(buff));
-		buff = "\"sourceAddress\":1234, \"temperature\":23.33, \"Vcc\":3.08 }}\nReceived a mesage ";
-		Object o = ObjectParser.parse(buff);
-		assertNotNull(o);
-		assertTrue(o instanceof HelloMessage);
-		HelloMessage hm = (HelloMessage)o;
-		assertEquals(1234,hm.getSourceAddress());
-		assertEquals(23.33F,hm.getTemperature(),0.01);
-		assertEquals(3.08F,hm.getVcc(),0.01);
-		
-		buff = "of type 100 from node 1234\n";
-		assertNull(ObjectParser.parse(buff));
-		buff="{ \"LightMessage\": { \"sourceAddress\":1234, \"intensity\":246 }}\n";
-		o = ObjectParser.parse(buff);
-		assertNotNull(o);
-		assertTrue(o instanceof LightMessage);
-		LightMessage lm = (LightMessage)o;
-		assertEquals(1234, lm.getSourceAddress());
-		assertEquals(246, lm.getIntensity());
-		
-		buff = "Received a mesage of type 0 from node 1234\n"
-			+ "{ \"HelloMessage\": { \"sourceAddress\":1234, \"temperature\":21.36, \"Vcc\":3.09 }}\n"
-			+ "Received a mesage of type 100 from node 1234"
-			+ "{ \"LightMessage\": { \"sourceAddress\":1234, \"intensity\":244 }}\n";
-		o = ObjectParser.parse(buff);
-		assertNotNull(o);
-		assertTrue(o instanceof HelloMessage);
-		o = ObjectParser.parse("");
-		assertNotNull(o);
-		assertTrue(o instanceof LightMessage);
-	}
-	
-	
-	
-	
 	
 
 }

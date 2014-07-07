@@ -152,8 +152,8 @@ public class TestDBService {
 		
 		List<String> datanames = db.getDataMessageClassNames();
 		assertEquals(2, datanames.size());
-		assertTrue(datanames.get(0).equals("bochovj.nordikino.server.ExtendedDataMessage") || 
-				datanames.get(0).equals("bochovj.nordikino.server.shared.messages.DataMessage"));
+		assertTrue(datanames.get(0).equals(ExtendedDataMessage.class.getName()) || 
+				datanames.get(0).equals(DataMessage.class.getName()));
 
 	}
 	
@@ -179,5 +179,6 @@ public class TestDBService {
 		}
 	}
 
+	
 
 }
