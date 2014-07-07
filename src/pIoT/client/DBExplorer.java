@@ -15,14 +15,9 @@
 package pIoT.client;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.dt.reflector.client.PropertyUtils;
-import org.dt.reflector.client.Reflector;
-
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
+import pIoT.client.events.SectionChangeEvent.Section;
 import pIoT.client.services.DBService;
 import pIoT.client.services.DBServiceAsync;
 import pIoT.shared.Node;
@@ -37,20 +32,13 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DecoratorPanel;
-import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -245,12 +233,13 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 						messagesPanel.clear();
 
 						for(DataMessage mess : result){
-							Widget w = renderObject(mess);
+							Widget w = DataVisualizer.renderObject(mess, true, "Update");
 							messagesPanel.add(w);
 						}
 					}
 					@Override
 					public void onFailure(Throwable caught) {
+						GWT.log("Cannot retrieve data of class name "+currentClass, caught);
 						Window.alert("Cannot retrieve data of class name "+currentClass+".\n" + caught.getMessage());
 						messagesPanel.clear();
 						messagesPanel.add(new HTML(caught.getMessage()));
@@ -266,7 +255,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 	private void updateDataMenu(){
 		datamenu.clear();
-		
+
 		//Always add All
 		Anchor allLabel = new Anchor("All");
 		allLabel.getElement().getStyle().setMargin(5, Unit.PX);
@@ -289,6 +278,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 					if(!className.equals(DataMessage.class.getName())){
 						int ix = className.lastIndexOf(".");
 						String reducedName = className.substring(ix + 1);
+						GWT.log(reducedName);
 						Anchor classNameLabel = new Anchor(reducedName);
 						classNameLabel.addClickHandler(new ClickHandler() {
 							@Override
@@ -305,172 +295,22 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("Cannot get stored objects names.\n" + caught.getMessage());
+				GWT.log("Cannot get stored data names", caught);
+				Window.alert("Cannot get stored data names.\n" + caught.getMessage());
 			}
 		});
 	}
 
-	private Widget renderObject(Object message){
-		DecoratorPanel decP = new DecoratorPanel();
 
-		FlexTable layout = new FlexTable();
-		layout.setCellSpacing(5);
-
-		Class<?> clazz = message.getClass();
-
-		String className = clazz.getSimpleName();
-		layout.setHTML(0, 0, className);
-		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-		layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
-
-		setFieldRows(layout, message);
-
-
-		decP.add(layout);
-		return decP;
-	}
-
-	private Widget renderBasicType(Object value){
-		if(value instanceof String) { //String
-			String text = (String) value;
-			if((text.length() > 20) || (text.indexOf('\n') != -1)){
-				TextArea ta = new TextArea();
-				ta.setText(text);
-				ta.setReadOnly(true);
-				ta.setWidth("300px");
-				ta.setHeight("300px");
-				return ta;
-			} else{
-				TextBox tb = new TextBox();
-				tb.setText(value.toString());
-				tb.setReadOnly(true);
-				return tb;
-			}
-		} else if((value instanceof Byte) || //char
-				(value instanceof Character)){
-			Label valueLabel = new Label(value.toString());
-			return valueLabel;
-		}
-		else if((value instanceof Integer) || //numbers
-				(value instanceof Long)||
-				(value instanceof Short)||
-				(value instanceof Float)||
-				(value instanceof Double)){
-			HorizontalPanel hp = new HorizontalPanel();
-			Label number = new Label(value.toString());
-			hp.add(number);
-			Anchor plot = new Anchor("plot");
-			plot.getElement().getStyle().setMarginLeft(5, Unit.PX);
-			hp.add(plot);
-			return hp;
-		} else if(value instanceof Date){ //Dates
-			Label valueLabel = new Label(value.toString());
-			return valueLabel;
-		} else if(value instanceof Boolean){ //Booleans
-			CheckBox cb = new CheckBox();
-			cb.setEnabled(false);
-			cb.setValue((Boolean) value);
-			return cb;
-		} 
-		return null;
-	}
-
-	private void setFieldRows(FlexTable layout, Object message){
-		int fieldN = 1;
-
-		Class<?> clazz = message.getClass();
-		Reflector refl = PropertyUtils.getReflector(clazz);
-
-		for(String fieldName : refl.list(message)){
-			Object fieldValue = refl.get(message, fieldName);
-			if(fieldValue == null){ //The field is null
-				layout.setHTML(fieldN, 0, fieldName);
-				layout.setWidget(fieldN, 1, new HTML("empty"));
-			}
-			else{ //Field is not null
-				Class<?> fieldclazz = fieldValue.getClass();
-
-				if(fieldclazz.isArray()){ //The field is an array
-					layout.setHTML(fieldN, 0, fieldName);
-					layout.setHTML(fieldN, 0, "cannot parse arrays :(");
-				}
-				else if(fieldclazz.isPrimitive() || //boolean, byte, char, short, int, long, float, and double
-						(fieldValue instanceof Integer) || //numbers
-						(fieldValue instanceof Long)||
-						(fieldValue instanceof Short)||
-						(fieldValue instanceof Float)||
-						(fieldValue instanceof Double)||
-						(fieldValue instanceof Byte)||
-						(fieldValue instanceof Character)||
-						(fieldValue instanceof Date)|| //Date
-						(fieldValue instanceof Boolean) //Booleand
-						){ 
-					layout.setHTML(fieldN, 0, fieldName);
-					layout.setWidget(fieldN, 1, renderBasicType(fieldValue));
-					fieldN++;
-				}
-				else if(fieldValue instanceof String) { //The field a String
-					String text = (String) fieldValue;
-					if((text.length() > 20) || (text.indexOf('\n') != -1)){
-						DisclosurePanel dp = new DisclosurePanel(fieldName);
-						dp.setAnimationEnabled(true);
-						dp.setContent(renderBasicType(fieldValue));
-						layout.setWidget(fieldN, 0, dp);
-						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-					} else{
-						layout.setHTML(fieldN, 0, fieldName);
-						layout.setWidget(fieldN, 1, renderBasicType(fieldValue));
-					}
-					fieldN++;
-				} else { //The field is a complex class
-
-					if(fieldValue instanceof List){ //The field is a List (do like an array)
-						List<?> list = (List<?>) fieldValue;
-						int len = list.size();
-						if(len ==0) {
-							layout.setHTML(fieldN, 0, fieldName);
-							layout.setWidget(fieldN, 1, new HTML("empty"));
-							fieldN++;
-						}
-						for(int i=0; i<len; i++){
-							Object element = list.get(i);
-							Class<?> elementclazz = element.getClass();
-							if(elementclazz.isPrimitive() ||
-									(element instanceof String) ||
-									(element instanceof Date)){
-								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
-								layout.setWidget(fieldN, 1, renderBasicType(element));
-								fieldN++;
-							} else {
-								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
-								dp.setAnimationEnabled(true);
-								dp.setContent(renderObject(element));
-								layout.setWidget(fieldN, 0, dp);
-								layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-								fieldN++;
-							}
-						} 
-					}
-					//TODO: render collections, iterables, maps?
-					else { //Generic class rendering
-						DisclosurePanel dp = new DisclosurePanel(fieldName);
-						dp.setAnimationEnabled(true);
-						dp.setContent(renderObject(fieldValue));
-						layout.setWidget(fieldN, 0, dp);
-						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-						fieldN++;
-					}
-				}
-			}
-		}
-	}
 
 
 	@Override
 	public void onSectionChanged(SectionChangeEvent evt) {
-		//Refresh data types and devices list that can have changed
-		updateDevicesList();
-		updateDataMenu();
+		if(evt.getCurrentSection() == Section.Data){
+			//Refresh data types and devices list that can have changed
+			updateDevicesList();
+			updateDataMenu();
+		}
 	}
 
 }

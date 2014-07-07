@@ -72,5 +72,6 @@ public class TestDB {
 		assertEquals(1, devices.size());
 		assertEquals("nord2", devices.get(0).getName());
 	}
+	
 
 }
