@@ -25,12 +25,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import pIoT.client.tests.ExtendedData;
-import pIoT.client.tests.ExtendedDataMessage;
-import pIoT.server.DB;
 import pIoT.server.DBServiceImpl;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.ExtendedData;
+import pIoT.shared.messages.ExtendedDataMessage;
 
 public class TestDBService {
 
@@ -43,7 +42,7 @@ public class TestDBService {
 
 	@After
 	public void tearDown() throws Exception {
-		DB.deleteDB();
+		DBServiceImpl.deleteDB();
 	}
 
 	@Test
@@ -51,11 +50,11 @@ public class TestDBService {
 		//store 10 messages
 		Date now = Calendar.getInstance().getTime();
 		Node dev1 = new Node(1, "dev1", "home");
-		DB.getDB().store(dev1);
+		DBServiceImpl.getDB().store(dev1);
 		for(int i=0; i<10; i++){
 			Date msgDate = new Date(now.getTime() + i*100);
 			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
-			DB.getDB().store(mess);
+			DBServiceImpl.getDB().store(mess);
 		}
 
 		//retrieve them
@@ -66,9 +65,9 @@ public class TestDBService {
 		}
 
 		Node dev2 = new Node(2, "anotherdev", "out");
-		DB.getDB().store(dev2);
+		DBServiceImpl.getDB().store(dev2);
 		DataMessage mess = new DataMessage(now, "message1", 2);
-		DB.getDB().store(mess);
+		DBServiceImpl.getDB().store(mess);
 
 		messages = db.getDataMessages(DataMessage.class.getName(), "anotherdev", -1, -1);
 		assertEquals(1, messages.size());
@@ -79,11 +78,11 @@ public class TestDBService {
 		//store 100 messages
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
-		DB.getDB().store(dev);
+		DBServiceImpl.getDB().store(dev);
 		for(int i=0; i<100; i++){
 			Date msgDate = new Date(now.getTime() + i*100);
 			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
-			DB.getDB().store(mess);
+			DBServiceImpl.getDB().store(mess);
 		}
 
 		//retrieve the first 10
@@ -120,16 +119,16 @@ public class TestDBService {
 	public void testgetClassStoredCount(){
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
-		DB.getDB().store(dev);
+		DBServiceImpl.getDB().store(dev);
 		
 		DataMessage mesg1 = new DataMessage(now, "message1", 1);
-		DB.getDB().store(mesg1);
+		DBServiceImpl.getDB().store(mesg1);
 		
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
-		DB.getDB().store(mesg2);
+		DBServiceImpl.getDB().store(mesg2);
 		
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null);
-		DB.getDB().store(mesg3);
+		DBServiceImpl.getDB().store(mesg3);
 		
 		int dms = db.getClassStoredCount(DataMessage.class.getName());
 		assertEquals(3, dms);
@@ -141,14 +140,14 @@ public class TestDBService {
 	public void testgetDataMessageClassNames(){
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
-		DB.getDB().store(dev);
+		DBServiceImpl.getDB().store(dev);
 		DataMessage mesg1 = new DataMessage(now, "message1", 1);
-		DB.getDB().store(mesg1);
+		DBServiceImpl.getDB().store(mesg1);
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
-		DB.getDB().store(mesg2);
+		DBServiceImpl.getDB().store(mesg2);
 		
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null);
-		DB.getDB().store(mesg3);
+		DBServiceImpl.getDB().store(mesg3);
 		
 		List<String> datanames = db.getDataMessageClassNames();
 		assertEquals(2, datanames.size());
@@ -161,13 +160,13 @@ public class TestDBService {
 	public void testExtendedData() throws Exception {
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
-		DB.getDB().store(dev);
+		DBServiceImpl.getDB().store(dev);
 		
 		ExtendedData data = new ExtendedData();
 		data.setABool(true);
 		data.setAnArray(new int[]{1,2,3,4});
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data);
-		DB.getDB().store(mesg3);
+		DBServiceImpl.getDB().store(mesg3);
 		
 		List<DataMessage> messageses = db.getDataMessages(ExtendedDataMessage.class.getName(), "dev", -1, -1);
 		assertEquals(1, messageses.size());

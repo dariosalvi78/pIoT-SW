@@ -40,6 +40,4 @@ public interface DBServiceAsync {
 	void updateDevice(Node dev, AsyncCallback<Void> callback);
 	
 	void getUnfixedNotifications(AsyncCallback<ArrayList<Notification>> callback);
-	
-	void fixNotification(Notification n, AsyncCallback<Void> callback);
 }

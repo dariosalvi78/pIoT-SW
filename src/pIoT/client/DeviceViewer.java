@@ -101,7 +101,8 @@ public class DeviceViewer extends Composite implements SectionChangeHandler{
 		layout.setWidget(2, 1, locationBox);
 		
 		layout.setHTML(3, 0, "last contact");
-		layout.setHTML(3, 1, dev.getLastContact().toString());
+		if(dev.getLastContact() != null)
+			layout.setHTML(3, 1, dev.getLastContact().toString());
 		
 		Button saveButt = new Button("Update");
 		saveButt.addClickHandler(new ClickHandler() {

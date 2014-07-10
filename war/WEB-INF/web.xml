@@ -25,6 +25,17 @@
     <servlet-name>DBServlet</servlet-name>
     <url-pattern>/pIoTServer/DB</url-pattern>
   </servlet-mapping>
+ 
+  <servlet>
+    <servlet-name>ActionsServlet</servlet-name>
+    <servlet-class>pIoT.server.ActionsServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>ActionsServlet</servlet-name>
+    <url-pattern>/pIoTServer/actions</url-pattern>
+  </servlet-mapping>
+  
   
   <!-- Default page to serve -->
   <welcome-file-list>

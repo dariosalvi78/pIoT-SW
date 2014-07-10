@@ -40,7 +40,6 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * A generic visualiser of {@link DataMessage}, it uses client-side reflection
@@ -233,8 +232,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 						messagesPanel.clear();
 
 						for(DataMessage mess : result){
-							Widget w = DataVisualizer.renderObject(mess, true, "Update");
-							messagesPanel.add(w);
+							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, "Update"));
 						}
 					}
 					@Override
@@ -278,7 +276,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 					if(!className.equals(DataMessage.class.getName())){
 						int ix = className.lastIndexOf(".");
 						String reducedName = className.substring(ix + 1);
-						GWT.log(reducedName);
 						Anchor classNameLabel = new Anchor(reducedName);
 						classNameLabel.addClickHandler(new ClickHandler() {
 							@Override

@@ -40,12 +40,12 @@ public class Configs {
 	}
 
 	public static Configs retrieveConfigs(){
-		ObjectSet<Configs> os = DB.getDB().query(Configs.class);
+		ObjectSet<Configs> os = DBServiceImpl.getDB().query(Configs.class);
 		if(os.size() >0)
 			return os.get(0);
 		else{
 			Configs cfs = new Configs();
-			DB.getDB().store(cfs);
+			DBServiceImpl.getDB().store(cfs);
 			return cfs;
 		}
 	}

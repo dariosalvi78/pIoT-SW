@@ -72,12 +72,6 @@ public interface DBService extends RemoteService {
 	/**
 	 * Gets the notifications that have not been fixed yet.
 	 */
-	ArrayList<Notification> getUnfixedNotifications() throws DataBaseException;
-	
-	/**
-	 * Marks a notification as fixed
-	 */
-	void fixNotification(Notification n) throws DataBaseException;
-	
+	ArrayList<Notification> getUnfixedNotifications() throws DataBaseException;	
 	
 }

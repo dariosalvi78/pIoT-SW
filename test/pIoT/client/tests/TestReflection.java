@@ -24,6 +24,8 @@ import org.dt.reflector.client.PropertyUtils;
 import org.dt.reflector.client.Reflector;
 
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.ExtendedData;
+import pIoT.shared.messages.ExtendedDataMessage;
 
 import com.google.gwt.junit.client.GWTTestCase;
 

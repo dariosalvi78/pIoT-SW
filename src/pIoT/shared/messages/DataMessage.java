@@ -26,7 +26,6 @@ import org.dt.reflector.client.Reflectable;
  * @author Dario Salvi
  *
  */
-@SuppressWarnings("serial")
 public class DataMessage implements Serializable, Reflectable {
 
 	/**

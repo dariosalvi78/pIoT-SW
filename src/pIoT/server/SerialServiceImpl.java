@@ -35,13 +35,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * The server-side implementation of the RPC service.
  */
 public class SerialServiceImpl extends RemoteServiceServlet implements SerialService {
-
-	/**
-	 * Stupid generated serial ID.
-	 */
-	private static final long serialVersionUID = -7920390667406634845L;
-
-	private SerialPort port;
+	
+	private static SerialPort port;
 	private String portName;
 	private String stringBuffer = "";
 	private long lastRead = 0;
@@ -60,6 +55,10 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		}
 
 		port = new SerialPort(portName);
+	}
+	
+	public static SerialPort getPort(){
+		return port;
 	}
 
 	@Override
@@ -106,7 +105,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		try{
 			Configs cfs = Configs.retrieveConfigs();
 			cfs.setComPort(portname);
-			DB.getDB().store(cfs);
+			DBServiceImpl.getDB().store(cfs);
 		} catch(Exception e){
 			//Nothing to do here
 		}
@@ -132,7 +131,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 									m.setReceivedTimestamp(Calendar.getInstance().getTime());
 									m.setSourceMessage(ObjectParser.getParsedMessage());
 									//store it !
-									DB.store(m);
+									DBServiceImpl.store(m);
 									//update devices
 									int devAddr = m.getSourceAddress();
 									if(devAddr!= 0){
@@ -170,7 +169,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	}
 
 	private void manageDevice(int address){
-		Query query = DB.getDB().query();
+		Query query = DBServiceImpl.getDB().query();
 		query.constrain(Node.class);
 		query.descend("address").constrain(address);
 		ObjectSet<Node> obset = null;
@@ -185,17 +184,17 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 			Node newdevice =new Node();
 			newdevice.setAddress(address);
 			newdevice.setLastContact(Calendar.getInstance().getTime());
-			DB.getDB().store(newdevice);
+			DBServiceImpl.getDB().store(newdevice);
 
 			//Generate notification
 			NewDeviceNotification notif = new NewDeviceNotification(Calendar.getInstance().getTime(),
 					false, newdevice);
-			ActionsManager.manage(notif);
+			ActionsServiceImpl.storeNotification(notif);
 		} else {
 			//The device already exists, just update the lastcontact field
 			Node dev = obset.get(0); //should be only one
 			dev.setLastContact(Calendar.getInstance().getTime()); //update last contact
-			DB.getDB().store(dev);
+			DBServiceImpl.getDB().store(dev);
 		}
 	}
 }

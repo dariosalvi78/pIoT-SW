@@ -12,13 +12,9 @@
  * 
  * Package containing some automatic tests.
  */
-package pIoT.client.tests;
+package pIoT.shared.messages;
 
 import java.util.Date;
-
-import org.dt.reflector.client.Reflectable;
-
-import pIoT.shared.messages.DataMessage;
 
 
 /**
@@ -26,7 +22,7 @@ import pIoT.shared.messages.DataMessage;
  * @author Dario Salvi
  *
  */
-public class ExtendedDataMessage extends DataMessage implements Reflectable {
+public class ExtendedDataMessage extends DataMessage {
 
 	private String extendedMessage;
 	
@@ -56,5 +52,9 @@ public class ExtendedDataMessage extends DataMessage implements Reflectable {
 
 	public void setData(ExtendedData data) {
 		this.data = data;
+	}
+	
+	public String toString(){
+		return "ext message: "+ extendedMessage+" data: "+ data.toString();
 	}
 }

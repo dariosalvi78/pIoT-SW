@@ -14,14 +14,21 @@
  */
 package pIoT.server;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import pIoT.client.services.DBService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.ExtendedData;
+import pIoT.shared.messages.ExtendedDataMessage;
 import pIoT.shared.notifications.Notification;
 
+import com.db4o.Db4oEmbedded;
+import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.ext.StoredClass;
 import com.db4o.query.Query;
@@ -31,19 +38,70 @@ import static pIoT.server.QueryUtils.limit;
 
 public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
+	private static ObjectContainer db;
+	private static final String dbFileName = "DB";
+	
+	/**
+	 * 
+	 */
+	public static synchronized ObjectContainer getDB() {
+		if(db == null)
+			db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), dbFileName);
+		
+		return db;
+	}
+	
+	/**
+	 * Deletes the DB entirely.
+	 */
+	public static void deleteDB() {
+		db.close();
+		new File(dbFileName).delete();
+		db = null;
+	}
+	
+	/**
+	 * Stores and commits.
+	 */
+	public static void store(Object o){
+		db.store(o);
+		db.commit();
+	}
+	
 	public DBServiceImpl() {
 		super();
+		
+		///*
+		Date now = Calendar.getInstance().getTime();
+		Node dev1 = new Node(1, "dev1", "home");
+		dev1.setLastContact(now);
+		getDB().store(dev1);
+		for(int i=0; i<10; i++){
+			ExtendedData data = new ExtendedData();
+			data.setABool(true);
+			ArrayList<Integer> lst = new ArrayList<>();
+			lst.add(i);
+			lst.add(i+1);
+			lst.add(i+2);
+			data.setAList(lst);
+			data.setAnArray(new int[]{1,2,3});
+			ExtendedDataMessage edm = new ExtendedDataMessage(new Date(now.getTime() + i*100),
+					"mess "+i, 1, "\nextended\n "+i, data);
+			getDB().store(edm);
+		}
+		
+		//*/
 	}
 
 	@Override
 	public void destroy(){
-		DB.getDB().close();
+		getDB().close();
 		super.destroy();
 	}
 
 	public ArrayList<String> getDataMessageClassNames(){
 		ArrayList<String> retval = new ArrayList<String>();
-		StoredClass[] storedclasses = DB.getDB().ext().storedClasses();
+		StoredClass[] storedclasses = getDB().ext().storedClasses();
 		for(StoredClass  stcl: storedclasses){
 			String name = stcl.getName();
 			if(isDataMessage(name))
@@ -54,7 +112,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	}
 
 	public int getClassStoredCount(String className){
-		StoredClass stc = DB.getDB().ext().storedClass(className);
+		StoredClass stc = getDB().ext().storedClass(className);
 		if(stc == null)
 			return 0;
 		else return stc.instanceCount();
@@ -84,7 +142,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		int devAddress = 0;
 		if(deviceName != null){
 			//Get the source address of the device
-			Query query = DB.getDB().query();
+			Query query = getDB().query();
 			query.constrain(Node.class);
 			query.descend("name").constrain(deviceName);
 
@@ -99,7 +157,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		ArrayList<DataMessage> retval = new ArrayList<DataMessage>();
 
 		//Query for the messages
-		Query query= DB.getDB().query();
+		Query query= getDB().query();
 		query.constrain(clazz);
 		query.descend("receivedTimestamp").orderDescending();
 		if(deviceName != null){
@@ -117,7 +175,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	public ArrayList<Node> getDevices() throws DataBaseException {
 		ArrayList<Node> retval = new ArrayList<Node>();
 
-		Query query = DB.getDB().query();
+		Query query = getDB().query();
 		query.constrain(Node.class);
 		query.descend("lastContact").orderDescending();
 		try{
@@ -135,7 +193,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	@Override
 	public void updateDevice(Node dev) throws DataBaseException {
 		//Find the device by address
-		Query query = DB.getDB().query();
+		Query query = getDB().query();
 		query.constrain(Node.class);
 		query.descend("address").constrain(dev.getAddress());
 		ObjectSet<Node> os = query.execute();
@@ -145,8 +203,8 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		//update it
 		existingdev.setLocation(dev.getLocation());
 		existingdev.setName(dev.getName());
-		DB.getDB().store(existingdev);
-		DB.getDB().commit();
+		getDB().store(existingdev);
+		getDB().commit();
 	}
 
 	@Override
@@ -154,7 +212,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			throws DataBaseException {
 		ArrayList<Notification> retval = new ArrayList<Notification>();
 
-		Query query = DB.getDB().query();
+		Query query = getDB().query();
 		query.constrain(Notification.class);
 		query.descend("created").orderDescending();
 		query.descend("fixed").constrain(false);
@@ -169,20 +227,6 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		}
 
 		return retval;
-	}
-
-	@Override
-	public void fixNotification(Notification n) throws DataBaseException {
-		//Find similar notification
-		n.setFixed(false);
-		ObjectSet<Notification> os =  DB.getDB().queryByExample(n);
-		if(os.size() == 0)
-			throw new IllegalArgumentException("Trying to fix a notification that does not exist or is already fixed");
-		//Update it
-		Notification existingn = os.get(0);
-		existingn.setFixed(true);
-		DB.getDB().store(existingn);
-		DB.getDB().commit();
 	}
 
 }

@@ -16,6 +16,8 @@ package pIoT.client;
 
 import java.util.ArrayList;
 
+import pIoT.client.services.ActionsService;
+import pIoT.client.services.ActionsServiceAsync;
 import pIoT.client.services.DBService;
 import pIoT.client.services.DBServiceAsync;
 import pIoT.shared.Node;
@@ -49,6 +51,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class NotificationsViewer extends Composite {
 
 	private final DBServiceAsync DB = GWT.create(DBService.class);
+	private final ActionsServiceAsync actions = GWT.create(ActionsService.class);
 	private final StackLayoutPanel stackPanel;
 	
 	/**
@@ -177,7 +180,7 @@ public class NotificationsViewer extends Composite {
 	}
 	
 	private void fixNotification(final Notification not, final Widget toremove){
-		DB.fixNotification(not, new AsyncCallback<Void>() {
+		actions.fixNotification(not, new AsyncCallback<Void>() {
 			@Override
 			public void onSuccess(Void result) {
 				stackPanel.remove(toremove);
