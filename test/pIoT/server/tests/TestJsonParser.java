@@ -19,9 +19,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.server.ObjectParser;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.ExtendedDataMessage;
 
 public class TestJsonParser {
 	

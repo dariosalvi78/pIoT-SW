@@ -42,7 +42,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	private long lastRead = 0;
 
 	public SerialServiceImpl(){
-		//Register here all the parseable classes:
+		//ADD HERE DATA MESSAGE CLASSES
 		ObjectParser.addClassType(DataMessage.class);
 		
 		portName = Configs.retrieveConfigs().getComPort();

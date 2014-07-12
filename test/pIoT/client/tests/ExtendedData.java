@@ -1,4 +1,4 @@
-package pIoT.shared.messages;
+package pIoT.client.tests;
 
 import java.io.Serializable;
 import java.util.ArrayList;

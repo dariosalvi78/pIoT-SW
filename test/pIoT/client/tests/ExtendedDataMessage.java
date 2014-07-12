@@ -12,9 +12,11 @@
  * 
  * Package containing some automatic tests.
  */
-package pIoT.shared.messages;
+package pIoT.client.tests;
 
 import java.util.Date;
+
+import pIoT.shared.messages.DataMessage;
 
 
 /**

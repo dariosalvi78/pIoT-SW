@@ -16,9 +16,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import pIoT.client.services.ActionsService;
+import pIoT.client.tests.ExtendedActionMessage;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.messages.ActionMessage;
-import pIoT.shared.messages.ExtendedActionMessage;
 import pIoT.shared.notifications.Notification;
 
 /**
@@ -28,21 +28,16 @@ import pIoT.shared.notifications.Notification;
  */
 public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsService {
 
+	private static ArrayList<ActionMessage> exampleActionMessages = new ArrayList<ActionMessage>();
 	
 	public ActionsServiceImpl() {
+		//ADD HERE EXAMPLES
+		//exampleActionMessages.add(new MyAction(1,11,90));
 	}
 	
 	@Override
 	public ArrayList<ActionMessage> getActionMessageExamples() {
-		ArrayList<ActionMessage> examples = new ArrayList<ActionMessage>();
-		//ADD HERE EXAMPLES
-		
-		ArrayList<Float> list = new ArrayList<>();
-		list.add(4.5F);
-		list.add(6.7F);
-		examples.add(new ExtendedActionMessage(10, true, list));
-		
-		return examples;
+		return exampleActionMessages;
 	}
 
 	@Override

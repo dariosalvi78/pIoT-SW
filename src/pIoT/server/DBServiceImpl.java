@@ -20,11 +20,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 import pIoT.client.services.DBService;
+import pIoT.client.tests.ExtendedData;
+import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.ExtendedData;
-import pIoT.shared.messages.ExtendedDataMessage;
 import pIoT.shared.notifications.Notification;
 
 import com.db4o.Db4oEmbedded;

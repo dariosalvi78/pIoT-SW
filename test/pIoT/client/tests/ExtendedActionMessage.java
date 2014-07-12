@@ -1,9 +1,11 @@
 /**
  * 
  */
-package pIoT.shared.messages;
+package pIoT.client.tests;
 
 import java.util.ArrayList;
+
+import pIoT.shared.messages.ActionMessage;
 
 /**
  * @author Dario
@@ -43,6 +45,6 @@ public class ExtendedActionMessage extends ActionMessage {
 
 	
 	public String toString(){
-		return "ext action addr: "+destAddress+", bool: "+aBool+", list: "+aList;
+		return "ext action addr: "+getDestAddress()+", bool: "+aBool+", list: "+aList;
 	}
 }

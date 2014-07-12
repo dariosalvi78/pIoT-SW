@@ -25,11 +25,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import pIoT.client.tests.ExtendedData;
+import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.server.DBServiceImpl;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.ExtendedData;
-import pIoT.shared.messages.ExtendedDataMessage;
 
 public class TestDBService {
 
