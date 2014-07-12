@@ -19,6 +19,7 @@ import pIoT.client.services.ActionsService;
 import pIoT.client.tests.ExtendedActionMessage;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.messages.ActionMessage;
+import pIoT.shared.messages.examples.SwitchSet;
 import pIoT.shared.notifications.Notification;
 
 /**
@@ -29,12 +30,12 @@ import pIoT.shared.notifications.Notification;
 public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsService {
 
 	private static ArrayList<ActionMessage> exampleActionMessages = new ArrayList<ActionMessage>();
-	
+
 	public ActionsServiceImpl() {
 		//ADD HERE EXAMPLES
-		//exampleActionMessages.add(new MyAction(1,11,90));
+		exampleActionMessages.add(new SwitchSet(10, true));
 	}
-	
+
 	@Override
 	public ArrayList<ActionMessage> getActionMessageExamples() {
 		return exampleActionMessages;
@@ -73,10 +74,12 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 	@Override
 	public void sendMessage(ActionMessage mess) throws pIoT.shared.SerialPortException {
 		System.out.println("sending action message "+mess);
-		
+
 		if(SerialServiceImpl.getPort().isOpened()){
 			Gson gson = new Gson();
-			String jsonmess = gson.toJson(mess);
+			String jsonmess = "{ \""+mess.getClass().getSimpleName()+"\": ";
+			jsonmess+= gson.toJson(mess);
+			jsonmess += " }";
 			try {
 				System.out.println("Sending message "+jsonmess);
 				SerialServiceImpl.getPort().writeString(jsonmess);

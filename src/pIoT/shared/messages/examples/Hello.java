@@ -1,0 +1,59 @@
+/**
+ * pIoT Server.
+ * A server for:
+ * <ul>
+ * <li> storing data from pIoT nodes
+ * <li> sending commands to pIoT nodes
+ * <li> viewing and interpreting data
+ * <li> setting up rules for reacting to events
+ * </ul>
+ * License: GNU GENERAL PUBLIC LICENSE Version 3
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * 
+ * Package containing messages used in the example sketches of pIoT-FW.
+ */
+package pIoT.shared.messages.examples;
+
+import java.util.Date;
+
+import pIoT.shared.messages.DataMessage;
+
+/**
+ * Hello Message used in the example sketches of pIoT
+ * @author Dario Salvi
+ *
+ */
+public class Hello extends DataMessage {
+
+	private float Vcc;
+	private float temperature;
+	
+	public Hello() {
+	}
+	
+	
+	public Hello(Date receivedTimestamp, String sourceMessage,
+			int sourceAddress, float vcc, float temperature) {
+		super(receivedTimestamp, sourceMessage, sourceAddress);
+		Vcc = vcc;
+		this.temperature = temperature;
+	}
+
+
+	public float getVcc() {
+		return Vcc;
+	}
+
+	public void setVcc(float vcc) {
+		Vcc = vcc;
+	}
+
+	public float getTemperature() {
+		return temperature;
+	}
+
+	public void setTemperature(float temperature) {
+		this.temperature = temperature;
+	}
+
+}
