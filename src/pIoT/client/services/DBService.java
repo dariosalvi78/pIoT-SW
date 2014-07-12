@@ -15,6 +15,7 @@
 package pIoT.client.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
@@ -56,6 +57,13 @@ public interface DBService extends RemoteService {
 	 * @return a list, ordered by time in descending way
 	 */
 	ArrayList<DataMessage> getDataMessages(String className, String deviceName, int limitstart, int limitend) throws DataBaseException, IllegalArgumentException;
+	
+	/**
+	 * Updates a data message.
+	 * @param originalTimestamp the timestamp of the message to be updated
+	 * @param newMessage the updated message
+	 */
+	void updateDataMessage(Date originalTimestamp, DataMessage newMessage)throws DataBaseException;
 	
 	/**
 	 * Retrieves all the devices in the DB.

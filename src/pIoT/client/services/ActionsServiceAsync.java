@@ -14,6 +14,8 @@
  */
 package pIoT.client.services;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import pIoT.shared.messages.ActionMessage;
@@ -25,6 +27,8 @@ import pIoT.shared.notifications.Notification;
  *
  */
 public interface ActionsServiceAsync {
+	
+	public void getActionMessageExamples(AsyncCallback<ArrayList<ActionMessage>> callback);
 
 	public void sendNotification(Notification n, AsyncCallback<Void> callback);
 	

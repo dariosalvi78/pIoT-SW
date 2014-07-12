@@ -14,6 +14,8 @@
  */
 package pIoT.client.services;
 
+import java.util.ArrayList;
+
 import pIoT.shared.DataBaseException;
 import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.ActionMessage;
@@ -30,6 +32,12 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("actions")
 public interface ActionsService extends RemoteService {
+	
+	/**
+	 * Retrieves a list of examples of action messages
+	 * @return
+	 */
+	public ArrayList<ActionMessage> getActionMessageExamples();
 
 	/**
 	 * Generates a notification that will be shown on the web.

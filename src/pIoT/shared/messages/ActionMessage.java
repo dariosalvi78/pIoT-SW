@@ -12,17 +12,23 @@ import org.dt.reflector.client.Reflectable;
  * @author Dario Salvi
  *
  */
-public abstract class ActionMessage implements Serializable, Reflectable {
+public class ActionMessage implements Serializable, Reflectable {
 
 	int destAddress;
 	
-	/**
-	 * 
-	 */
 	public ActionMessage() {
-		// TODO Auto-generated constructor stub
 	}
 	
-	public abstract ActionMessage getExample();
+	public ActionMessage(int destination) {
+		destAddress = destination;
+	}
+
+	public int getDestAddress() {
+		return destAddress;
+	}
+
+	public void setDestAddress(int destAddress) {
+		this.destAddress = destAddress;
+	}
 
 }

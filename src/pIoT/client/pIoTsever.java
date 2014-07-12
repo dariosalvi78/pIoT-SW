@@ -71,7 +71,9 @@ public class pIoTsever implements EntryPoint, HasHandlers {
 		addSectionChangeHandler(refl);
 		tbp.add(refl, "Data");
 		
-		tbp.add(new HTML("TBD"), "Actions");
+		ActionEditor acts = new ActionEditor();
+		addSectionChangeHandler(acts);
+		tbp.add(acts, "Actions");
 		
 		tbp.add(new HTML("TBD"), "Rules");
 		

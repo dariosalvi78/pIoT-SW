@@ -3,16 +3,22 @@
  */
 package pIoT.server;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jssc.SerialPortException;
 
 import com.db4o.ObjectSet;
 import com.google.gson.Gson;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import pIoT.client.services.ActionsService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.messages.ActionMessage;
+import pIoT.shared.messages.ExtendedActionMessage;
 import pIoT.shared.notifications.Notification;
 
 /**
@@ -20,15 +26,26 @@ import pIoT.shared.notifications.Notification;
  * @author Dario Salvi
  *
  */
-public class ActionsServiceImpl implements ActionsService {
+public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsService {
 
-	/**
-	 * 
-	 */
+	
 	public ActionsServiceImpl() {
 	}
+	
+	@Override
+	public ArrayList<ActionMessage> getActionMessageExamples() {
+		ArrayList<ActionMessage> examples = new ArrayList<ActionMessage>();
+		//ADD HERE EXAMPLES
+		
+		ArrayList<Float> list = new ArrayList<>();
+		list.add(4.5F);
+		list.add(6.7F);
+		examples.add(new ExtendedActionMessage(10, true, list));
+		
+		return examples;
+	}
 
-	//@Override
+	@Override
 	public void sendNotification(Notification not) {
 		storeNotification(not);
 	}
@@ -60,10 +77,13 @@ public class ActionsServiceImpl implements ActionsService {
 
 	@Override
 	public void sendMessage(ActionMessage mess) throws pIoT.shared.SerialPortException {
+		System.out.println("sending action message "+mess);
+		
 		if(SerialServiceImpl.getPort().isOpened()){
 			Gson gson = new Gson();
 			String jsonmess = gson.toJson(mess);
 			try {
+				System.out.println("Sending message "+jsonmess);
 				SerialServiceImpl.getPort().writeString(jsonmess);
 			} catch (SerialPortException e) {
 				throw new pIoT.shared.SerialPortException(e);

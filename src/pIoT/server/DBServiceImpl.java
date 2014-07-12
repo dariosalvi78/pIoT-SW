@@ -40,17 +40,17 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
 	private static ObjectContainer db;
 	private static final String dbFileName = "DB";
-	
+
 	/**
 	 * 
 	 */
 	public static synchronized ObjectContainer getDB() {
 		if(db == null)
 			db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), dbFileName);
-		
+
 		return db;
 	}
-	
+
 	/**
 	 * Deletes the DB entirely.
 	 */
@@ -59,7 +59,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		new File(dbFileName).delete();
 		db = null;
 	}
-	
+
 	/**
 	 * Stores and commits.
 	 */
@@ -67,10 +67,10 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		db.store(o);
 		db.commit();
 	}
-	
+
 	public DBServiceImpl() {
 		super();
-		
+
 		///*
 		Date now = Calendar.getInstance().getTime();
 		Node dev1 = new Node(1, "dev1", "home");
@@ -89,7 +89,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 					"mess "+i, 1, "\nextended\n "+i, data);
 			getDB().store(edm);
 		}
-		
+
 		//*/
 	}
 
@@ -169,6 +169,25 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			retval.add(mess);
 		}
 		return retval;
+	}
+
+	public void updateDataMessage(Date originalTimestamp, DataMessage newMessage){
+		//Find the message by timestamp
+		Query query = getDB().query();
+		query.constrain(DataMessage.class);
+		query.descend("receivedTimestamp").constrain(originalTimestamp);
+		ObjectSet<DataMessage> os = query.execute();
+		
+		if(os.size() == 0)
+			throw new IllegalArgumentException("Trying to update a message that does not exist");
+		if(os.size() >1)
+			throw new IllegalArgumentException("More than one message found to be updated");
+		//Delete it
+		DataMessage oldmessage = os.get(0);
+		getDB().delete(oldmessage);
+		//Save new
+		getDB().store(newMessage);
+		getDB().commit();
 	}
 
 	@Override

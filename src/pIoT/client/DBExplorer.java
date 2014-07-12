@@ -15,6 +15,9 @@
 package pIoT.client;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import pIoT.client.DataVisualizer.UpdateHandler;
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
 import pIoT.client.events.SectionChangeEvent.Section;
@@ -103,10 +106,10 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 				updateContent();
 			}
 		});
+		itemsN.addItem("1");
 		itemsN.addItem("5");
 		itemsN.addItem("10");
 		itemsN.addItem("20");
-		itemsN.addItem("50");
 		itemsN.addItem("All");
 		itemsN.setSelectedIndex(0);
 		itemsN.getElement().getStyle().setMarginLeft(5, Unit.PX);
@@ -232,7 +235,25 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 						messagesPanel.clear();
 
 						for(DataMessage mess : result){
-							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, "Update"));
+							final Date originalTimestamp = new Date(mess.getReceivedTimestamp().getTime());
+							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, "Update", new UpdateHandler() {
+								
+								@Override
+								public void handle(Object o) {
+									DB.updateDataMessage(originalTimestamp, (DataMessage) o, new AsyncCallback<Void>() {
+
+										@Override
+										public void onSuccess(Void result) {
+											Window.alert("Message updated");
+										}
+										@Override
+										public void onFailure(Throwable caught) {
+											Window.alert("Cannot update message\n"+caught.getMessage());
+											GWT.log("Cannot update message", caught);
+										}
+									});
+								}
+							}));
 						}
 					}
 					@Override

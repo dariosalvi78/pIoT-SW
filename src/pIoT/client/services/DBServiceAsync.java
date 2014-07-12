@@ -15,6 +15,7 @@
 package pIoT.client.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
@@ -34,6 +35,8 @@ public interface DBServiceAsync {
 	void getClassStoredCount(String classname, AsyncCallback<Integer> callback);
 
 	void getDataMessages(String className, String deviceName, int limitstart, int limitend, AsyncCallback<ArrayList<DataMessage>> callback);
+	
+	void updateDataMessage(Date originalTimestamp, DataMessage newMessage, AsyncCallback<Void> callback);
 	
 	void getDevices(AsyncCallback<ArrayList<Node>> callback);
 	

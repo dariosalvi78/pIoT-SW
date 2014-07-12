@@ -12,7 +12,13 @@ public class ExtendedData implements Serializable, Reflectable{
 	private ArrayList<Integer> aList = new ArrayList<Integer>();
 	
 	public ExtendedData(){
-		
+	}
+	
+	public ExtendedData(boolean aBool, int[] anArray, ArrayList<Integer> aList) {
+		super();
+		this.aBool = aBool;
+		this.anArray = anArray;
+		this.aList = aList;
 	}
 	
 	public boolean isABool() {

@@ -48,14 +48,16 @@ import com.google.gwt.user.client.ui.Widget;
  *
  */
 public class DataVisualizer {
-
-
-	public static Widget renderObject(Object object, boolean editable, boolean allowplot, String setButtonText){
-		return renderObject(object, editable, allowplot, setButtonText, new ArrayList<Runnable>());
+	
+	public static interface UpdateHandler{
+		public void handle(Object o);
 	}
 
-	private static Widget renderObject(final Object object, boolean editable, boolean allowplot, String setButtonText, final ArrayList<Runnable> fieldchangers){
+	public static Widget renderObject(Object object, boolean editable, boolean allowplot, String setButtonText, UpdateHandler handler){
+		return renderObject(object, editable, allowplot, setButtonText, handler, new ArrayList<Runnable>());
+	}
 
+	private static Widget renderObject(final Object object, boolean editable, boolean allowplot, String setButtonText, final UpdateHandler handler, final ArrayList<Runnable> fieldchangers){
 		DecoratorPanel decP = new DecoratorPanel();
 
 		FlexTable layout = new FlexTable();
@@ -70,13 +72,15 @@ public class DataVisualizer {
 
 		int lastrow = setFieldRows(layout, object, editable, allowplot, fieldchangers);
 
-		if((editable) && (setButtonText != null)){
+		if((editable) && (setButtonText != null) && (handler != null)){
 			Button setButton = new Button(setButtonText);
 			setButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
 					for(Runnable ch : fieldchangers)
 						ch.run();
+					
+					handler.handle(object);
 				}
 			});
 			layout.setWidget(lastrow, 0, setButton);
@@ -101,6 +105,7 @@ public class DataVisualizer {
 		final Reflector refl = PropertyUtils.getReflector(clazz);
 
 		for(final String fieldName : refl.list(object)){
+			
 			Object fieldValue = refl.get(object, fieldName);
 			if(fieldValue == null){ //The field is null
 				layout.setHTML(fieldN, 0, fieldName);
@@ -112,30 +117,12 @@ public class DataVisualizer {
 				if(fieldclazz.isArray()){ //The field is an array
 					layout.setHTML(fieldN, 0, fieldName);
 					layout.setHTML(fieldN, 1, "cannot parse arrays :(");
-				}
-				else if(isBasic(fieldValue)){ 
-					layout.setHTML(fieldN, 0, fieldName);
-					boolean plot = allowplot;
-					if(fieldName.equalsIgnoreCase("sourceAddress"))
-						plot = false;
-					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot);
-					layout.setWidget(fieldN, 1, md.getWidget());
-					fieldchangers.add(new Runnable() {
-						@Override
-						public void run() {
-							Object val = md.getChanger();
-							if(val != null)
-								refl.set(object, fieldName, val);
-						}
-					});
-					fieldN++;
-				}
-				else if(fieldValue instanceof String) { //The field is a String
+				} else if(fieldValue instanceof String) { //The field is a String
 					String text = (String) fieldValue;
 					boolean edit = editable;
 					if(fieldName.equalsIgnoreCase("sourceMessage")) //never edit source message
 						edit = false;
-					if((text.length() > 20) || (text.indexOf('\n') != -1)){
+					if((text.length() > 20) || (text.indexOf('\n') != -1)){ //long text
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
@@ -152,7 +139,7 @@ public class DataVisualizer {
 
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
-					} else{
+					} else{ //short text
 						layout.setHTML(fieldN, 0, fieldName);
 
 						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false);
@@ -167,7 +154,24 @@ public class DataVisualizer {
 						});
 					}
 					fieldN++;
-				} else { //The field is a complex class
+				} else if(isBasic(fieldValue)){ 
+					layout.setHTML(fieldN, 0, fieldName);
+					boolean plot = allowplot;
+					if(fieldName.equalsIgnoreCase("sourceAddress"))
+						plot = false;
+					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot);
+					layout.setWidget(fieldN, 1, md.getWidget());
+					fieldchangers.add(new Runnable() {
+						@Override
+						public void run() {
+							Object val = md.getChanger();
+							if(val != null)
+								refl.set(object, fieldName, val);
+						}
+					});
+					fieldN++;
+				}
+				 else { //The field is a complex class
 
 					if(fieldValue instanceof List){ //The field is a List 
 						//TODO: add new element
@@ -225,7 +229,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						dp.setContent(renderObject(fieldValue, editable, allowplot, null, fieldchangers));
+						dp.setContent(renderObject(fieldValue, editable, allowplot, null, null, fieldchangers));
 
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
