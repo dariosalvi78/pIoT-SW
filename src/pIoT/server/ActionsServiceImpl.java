@@ -5,18 +5,13 @@ package pIoT.server;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import jssc.SerialPortException;
 
 import com.db4o.ObjectSet;
 import com.google.gson.Gson;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import pIoT.client.services.ActionsService;
-import pIoT.client.tests.ExtendedActionMessage;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.messages.ActionMessage;
 import pIoT.shared.messages.examples.SwitchSet;

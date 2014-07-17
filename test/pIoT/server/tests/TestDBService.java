@@ -42,6 +42,7 @@ public class TestDBService {
 
 	@After
 	public void tearDown() throws Exception {
+		db.destroy();
 		DBServiceImpl.deleteDB();
 	}
 
@@ -50,24 +51,25 @@ public class TestDBService {
 		//store 10 messages
 		Date now = Calendar.getInstance().getTime();
 		Node dev1 = new Node(1, "dev1", "home");
-		DBServiceImpl.getDB().store(dev1);
+		DBServiceImpl.store(dev1);
 		for(int i=0; i<10; i++){
 			Date msgDate = new Date(now.getTime() + i*100);
 			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
-			DBServiceImpl.getDB().store(mess);
+			DBServiceImpl.store(mess);
 		}
-
+		
 		//retrieve them
 		ArrayList<DataMessage> messages = db.getDataMessages(DataMessage.class.getName(), "dev1", -1, -1);
+		assertEquals(10, messages.size());
 		//check they're ordered in descending way
 		for(int i=0; i<10; i++){
 			assertEquals("message"+(9-i), messages.get(i).getSourceMessage());
 		}
 
 		Node dev2 = new Node(2, "anotherdev", "out");
-		DBServiceImpl.getDB().store(dev2);
+		DBServiceImpl.store(dev2);
 		DataMessage mess = new DataMessage(now, "message1", 2);
-		DBServiceImpl.getDB().store(mess);
+		DBServiceImpl.store(mess);
 
 		messages = db.getDataMessages(DataMessage.class.getName(), "anotherdev", -1, -1);
 		assertEquals(1, messages.size());
