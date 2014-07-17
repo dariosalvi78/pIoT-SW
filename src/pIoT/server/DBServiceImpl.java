@@ -39,7 +39,7 @@ import static pIoT.server.QueryUtils.limit;
 public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
 	private static ObjectContainer db;
-	private static final String dbFileName = "DB";
+	public static String dbFileName = "DB";
 
 	/**
 	 * 
@@ -55,42 +55,22 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	 * Deletes the DB entirely.
 	 */
 	public static void deleteDB() {
-		db.close();
+		getDB().close();
 		new File(dbFileName).delete();
 		db = null;
 	}
-
+	
 	/**
 	 * Stores and commits.
 	 */
 	public static void store(Object o){
-		db.store(o);
-		db.commit();
+		getDB().store(o);
+		getDB().commit();
 	}
 
 	public DBServiceImpl() {
 		super();
 
-		///*
-		Date now = Calendar.getInstance().getTime();
-		Node dev1 = new Node(1, "dev1", "home");
-		dev1.setLastContact(now);
-		getDB().store(dev1);
-		for(int i=0; i<10; i++){
-			ExtendedData data = new ExtendedData();
-			data.setABool(true);
-			ArrayList<Integer> lst = new ArrayList<>();
-			lst.add(i);
-			lst.add(i+1);
-			lst.add(i+2);
-			data.setAList(lst);
-			data.setAnArray(new int[]{1,2,3});
-			ExtendedDataMessage edm = new ExtendedDataMessage(new Date(now.getTime() + i*100),
-					"mess "+i, 1, "\nextended\n "+i, data);
-			getDB().store(edm);
-		}
-
-		//*/
 	}
 
 	@Override

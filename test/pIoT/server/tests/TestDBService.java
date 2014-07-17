@@ -37,6 +37,7 @@ public class TestDBService {
 
 	@Before
 	public void setUp() throws Exception {
+		DBServiceImpl.dbFileName = "DBTEST";
 		db = new DBServiceImpl();
 	}
 
