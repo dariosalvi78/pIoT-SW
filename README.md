@@ -45,3 +45,16 @@ extra folders:
 *  libs: contains external libraries used
 *  war: contains the content of the compiled servlet packages
 
+
+Deployment:
+-----------
+
+for a light standalone server you can use [Jetty](http://www.eclipse.org/jetty/).
+Download a recent stable distribution, then unzip its folder.
+In Eclipse compile GWT
+Copy the war folder of the Eclise project into webapps fodler of jetty
+rename the folder from war to pIoT
+execute java -jar start.jar in a console
+go to http://localhost:8080/pIoT/
+
+and here's the server running

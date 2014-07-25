@@ -94,7 +94,7 @@ public class NotificationsViewer extends Composite {
 		okButt.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				fixNotification(not, vert);
+				fixNotification(not);
 			}
 		});
 		vert.add(okButt);
@@ -163,7 +163,7 @@ public class NotificationsViewer extends Composite {
 				DB.updateDevice(dev, new AsyncCallback<Void>() {
 					@Override
 					public void onSuccess(Void result) {
-						fixNotification(newde, layout);
+						fixNotification(newde);
 					}
 					@Override
 					public void onFailure(Throwable caught) {
@@ -179,16 +179,17 @@ public class NotificationsViewer extends Composite {
 		return layout;
 	}
 	
-	private void fixNotification(final Notification not, final Widget toremove){
+	private void fixNotification(final Notification not){
 		actions.fixNotification(not, new AsyncCallback<Void>() {
 			@Override
 			public void onSuccess(Void result) {
-				stackPanel.remove(toremove);
+				update();
 			}
 			
 			@Override
 			public void onFailure(Throwable caught) {
 				Window.alert("Cannot mark notification as fixed. "+caught.getMessage());
+				update();
 			}
 		});
 	}

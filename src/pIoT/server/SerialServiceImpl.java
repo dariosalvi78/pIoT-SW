@@ -23,6 +23,7 @@ import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.DataMessage;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
+import pIoT.shared.messages.examples.SwitchState;
 import pIoT.shared.notifications.NewDeviceNotification;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -49,6 +50,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		//Classes of the example sketches:
 		ObjectParser.addClassType(Hello.class);
 		ObjectParser.addClassType(LightState.class);
+		ObjectParser.addClassType(SwitchState.class);
 		
 		portName = Configs.retrieveConfigs().getComPort();
 
