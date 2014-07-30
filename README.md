@@ -45,16 +45,58 @@ extra folders:
 *  libs: contains external libraries used
 *  war: contains the content of the compiled servlet packages
 
+Implementation of messages:
+---------------------------
+
+For using the server with your pIoT sketches, you need to model all the JSON messages that you send/receive with your Base node as java classes.
+This requires you to open the source code of the server and add your classes.
+For setting up Eclipse:
+*  Install a [Java Development Kit](http://java.sun.com/javase/downloads/).
+*  Download a [stable version of Eclipse](http://www.eclipse.org/downloads/).
+*  Install the [GWT development kit](http://www.gwtproject.org/gettingstarted.html) or set up the [GWT plugin in Eclipse](http://www.gwtproject.org/usingeclipse.html) (recommended choice).
+
+If you use Google Chrome and you want to install the GWT development mode plugin in Chrome and Windows 8 [you may find some problems](http://stackoverflow.com/questions/19059544/how-to-install-gwt-browser-plugin).
+
+Download the project from the GIT repository and import it in Eclipse.
+
+Now, for messages received from pIoT nodes you need to model them in the following way:
+* Put them into pIoT.shared.messages package, or a subpackage.
+* Extend class DataMessage.
+* Make sure is has a public constructor with no arguments.
+* Create getters and setters for all properties, Java bean style.
+* Do not created nested types, always declare classes separately.
+* If you include extra classes in your message, make sure these implement Serializable and Reflectable.
+* Do not use arrays, use some implementation of List instead (e.g. ArrayList).
+* When importing other types, make sure they are serializable.
+* add your data message classes into SerialServiceImpl, in the constructor:
+    public SerialServiceImpl(){
+        //ADD HERE DATA MESSAGES CLASSES
+        ObjectParser.addClassType(DataMessage.class);
+        ObjectParser.addClassType(MyDataMessage.class); <--- ADD YOUR CLASS HERE
+
+For messages sent from the server to the nodes, you need to follow these rules:
+* Extend class ActionMessage instead of DataMessage.
+* Follow the same rules about implemented interfaces and nested classes as for data messages.
+* Add your action message examples into ActionsServiceImpl, in the constructor
+    public ActionsServiceImpl() {
+        //ADD HERE ACTION MESSAGES CLASSES
+        actionMessageExamples.add(new MyActionMessage(10, 5.5, true));  <--- ADD YOUR CLASS HERE
+    }
+
+Now the server should be able to parse your JSON messages and visualize them correctly.
+Be sure to test it well, as it's easy to make mistakes at this point.
 
 Deployment:
 -----------
 
 for a light standalone server you can use [Jetty](http://www.eclipse.org/jetty/).
-Download a recent stable distribution, then unzip its folder.
-In Eclipse compile GWT
-Copy the war folder of the Eclise project into webapps fodler of jetty
-rename the folder from war to pIoT
-execute java -jar start.jar in a console
-go to http://localhost:8080/pIoT/
 
-and here's the server running
+*  Download a recent stable distribution of jetty, then unzip its folder.
+*  In Eclipse, right button on the project's icon -> Google -> GWT compile
+*  Copy the war folder of the Eclise project into webapps folder of jetty.
+*  Rename the folder from war to pIoT.
+*  Execute java -jar start.jar in a console at the root folder of jetty. If you want logging support on file execute java -DVERBOSE -jar start.jar etc/jetty-logging.xml
+*  On your browser, go to http://localhost:8080/pIoT/
+
+have fun!
+
