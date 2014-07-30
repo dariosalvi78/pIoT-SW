@@ -69,20 +69,23 @@ Now, for messages received from pIoT nodes you need to model them in the followi
 * Do not use arrays, use some implementation of List instead (e.g. ArrayList).
 * When importing other types, make sure they are serializable.
 * add your data message classes into SerialServiceImpl, in the constructor:
-    public SerialServiceImpl(){
-        //ADD HERE DATA MESSAGES CLASSES
-        ObjectParser.addClassType(DataMessage.class);
-        ObjectParser.addClassType(MyDataMessage.class); <--- ADD YOUR CLASS HERE
+```
+public SerialServiceImpl(){
+    //ADD HERE DATA MESSAGES CLASSES
+    ObjectParser.addClassType(DataMessage.class);
+    ObjectParser.addClassType(MyDataMessage.class); <--- ADD YOUR CLASS HERE
+```
 
 For messages sent from the server to the nodes, you need to follow these rules:
 * Extend class ActionMessage instead of DataMessage.
 * Follow the same rules about implemented interfaces and nested classes as for data messages.
 * Add your action message examples into ActionsServiceImpl, in the constructor
-    public ActionsServiceImpl() {
-        //ADD HERE ACTION MESSAGES CLASSES
-        actionMessageExamples.add(new MyActionMessage(10, 5.5, true));  <--- ADD YOUR CLASS HERE
-    }
-
+```
+public ActionsServiceImpl() {
+    //ADD HERE ACTION MESSAGES CLASSES
+    actionMessageExamples.add(new MyActionMessage(10, 5.5, true));  <--- ADD YOUR CLASS HERE
+}
+```
 Now the server should be able to parse your JSON messages and visualize them correctly.
 Be sure to test it well, as it's easy to make mistakes at this point.
 
@@ -95,7 +98,7 @@ for a light standalone server you can use [Jetty](http://www.eclipse.org/jetty/)
 *  In Eclipse, right button on the project's icon -> Google -> GWT compile
 *  Copy the war folder of the Eclise project into webapps folder of jetty.
 *  Rename the folder from war to pIoT.
-*  Execute java -jar start.jar in a console at the root folder of jetty. If you want logging support on file execute java -DVERBOSE -jar start.jar etc/jetty-logging.xml
+*  Execute ```java -jar start.jar``` in a console at the root folder of jetty. If you want logging support on file execute ```java -DVERBOSE -jar start.jar etc/jetty-logging.xml```
 *  On your browser, go to http://localhost:8080/pIoT/
 
 have fun!
