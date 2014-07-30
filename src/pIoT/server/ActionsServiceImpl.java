@@ -5,6 +5,8 @@ package pIoT.server;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Logger;
+
 import jssc.SerialPortException;
 
 import com.db4o.ObjectSet;
@@ -24,11 +26,15 @@ import pIoT.shared.notifications.Notification;
  */
 public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsService {
 
+	private static Logger logger = Logger.getLogger(ActionsServiceImpl.class.getName());
+	
 	private static ArrayList<ActionMessage> exampleActionMessages = new ArrayList<ActionMessage>();
 
 	public ActionsServiceImpl() {
 		//ADD HERE EXAMPLES
 		exampleActionMessages.add(new SwitchSet(10, true));
+		
+		logger.info("Action service started");
 	}
 
 	@Override
@@ -39,6 +45,7 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 	@Override
 	public void sendNotification(Notification not) {
 		storeNotification(not);
+		logger.fine("Notification stored: "+not.getMessage());
 	}
 
 	public static void storeNotification(Notification not){
@@ -64,11 +71,12 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 		existingn.setFixed(true);
 		DBServiceImpl.getDB().store(existingn);
 		DBServiceImpl.getDB().commit();
+		logger.fine("Notification fixed: "+n.getMessage());
 	}
 
 	@Override
 	public void sendMessage(ActionMessage mess) throws pIoT.shared.SerialPortException {
-		System.out.println("sending action message "+mess);
+		logger.fine("Sending action message "+mess);
 
 		if(SerialServiceImpl.getPort().isOpened()){
 			Gson gson = new Gson();

@@ -15,6 +15,8 @@
 package pIoT.server;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gwt.core.shared.GWT;
@@ -25,6 +27,8 @@ import com.google.gwt.core.shared.GWT;
  *
  */
 public class ObjectParser {
+	
+	private static Logger logger = Logger.getLogger(ObjectParser.class.getName());
 
 	private static String stringBuffer = "";
 	private static String lastMessage = "";
@@ -78,6 +82,7 @@ public class ObjectParser {
 							String jsonStr = stringBuffer.substring(startObjectIndex, i +1);
 							String dataname = getNameOfJsonObject(jsonStr);
 							String content = stringBuffer.substring(startContentIndex, endContentIndex +1);
+							logger.fine("Parsing string "+jsonStr+" associated to class name "+dataname);
 							Class<?> cl = getClassFromSimpleName(dataname);
 							Gson gson = new Gson();
 							Object retVal = gson.fromJson(content, cl);
@@ -92,9 +97,7 @@ public class ObjectParser {
 							
 							return retVal;
 						} catch(Exception ex){
-							GWT.log("Strange data when parsing from serial", ex);
-							System.out.println("Strange data when parsing from serial:");
-							ex.printStackTrace();
+							logger.log(Level.WARNING, "Strange data when parsing from serial",ex);
 							//In case of problems, reset and go on
 							inObject = false;
 							startObjectIndex = 0;

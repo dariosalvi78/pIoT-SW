@@ -16,12 +16,11 @@ package pIoT.server;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import pIoT.client.services.DBService;
-import pIoT.client.tests.ExtendedData;
-import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
@@ -38,11 +37,13 @@ import static pIoT.server.QueryUtils.limit;
 
 public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
+	private static Logger logger = Logger.getLogger(DBServiceImpl.class.getName());
+	
 	private static ObjectContainer db;
 	public static String dbFileName = "DB";
-
+	
 	/**
-	 * 
+	 * Returns the object container, the DB
 	 */
 	public static synchronized ObjectContainer getDB() {
 		if(db == null)
@@ -70,7 +71,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
 	public DBServiceImpl() {
 		super();
-
+		logger.info("DB service started");
 	}
 
 	@Override
@@ -185,6 +186,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			}
 		} catch(Exception ex){
 			//Just return an empty list
+			logger.log(Level.WARNING, "Error while retrieving devices list", ex);
 		}
 		return retval;
 	}
@@ -223,6 +225,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		}
 		catch(Exception ex){
 			//Don't do anything, return an empty list
+			logger.log(Level.WARNING, "Error while retrieving unfixed notifications", ex);
 		}
 
 		return retval;

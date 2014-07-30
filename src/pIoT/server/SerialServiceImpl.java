@@ -16,6 +16,8 @@ package pIoT.server;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import pIoT.client.services.SerialService;
 import pIoT.shared.Node;
@@ -38,7 +40,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * The server-side implementation of the RPC service.
  */
 public class SerialServiceImpl extends RemoteServiceServlet implements SerialService {
-	
+
+	private static Logger logger = Logger.getLogger(SerialServiceImpl.class.getName());
+
 	private static SerialPort port;
 	private String portName;
 	private String stringBuffer = "";
@@ -51,7 +55,9 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(Hello.class);
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
+
 		
+
 		portName = Configs.retrieveConfigs().getComPort();
 
 		if(portName == null){
@@ -62,8 +68,9 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		}
 
 		port = new SerialPort(portName);
+		logger.info("Serial Service started");
 	}
-	
+
 	public static SerialPort getPort(){
 		return port;
 	}
@@ -72,8 +79,12 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	public ArrayList<String> getComPorts() throws IllegalArgumentException {
 		ArrayList<String> res = new ArrayList<>();
 		String[] ports = SerialPortList.getPortNames();
-		for(int i=0; i<ports.length; i++)
+		String logmessage = "Available com ports: ";
+		for(int i=0; i<ports.length; i++){
 			res.add(ports[i]);
+			logmessage +=ports[i]+" ";
+		}
+		logger.log(Level.FINE, logmessage);
 		return res;
 	}
 
@@ -86,13 +97,16 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	public boolean startStop(String portname) throws SerialPortException {
 		try {
 			if(port.isOpened()){
+				logger.log(Level.INFO, "Com port "+port.getPortName()+" stopped");
 				stop();
 				return false;
-			}else {
+			} else {
+				logger.log(Level.INFO, "Com port "+port.getPortName()+" started");
 				start(portname);
 				return true;
 			}
 		} catch (jssc.SerialPortException e) {
+			logger.log(Level.SEVERE, "Cannot start/stop com port "+port.getPortName(), e);
 			throw new SerialPortException(e.getMessage());
 		}
 	}
@@ -123,6 +137,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 					try {
 						String str = port.readString();
 						if(str != null){
+							logger.finer("Com port says: "+str);
 							//Accumulate only if requests are newer than 10 seconds
 							//otherwise just rewrite the string
 							long now = Calendar.getInstance().getTimeInMillis();
@@ -133,23 +148,28 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 							Object o = ObjectParser.parse(str);
 							if(o!= null){
 								if(o instanceof DataMessage){
+									logger.fine("Object parsed from serial com of class " + o.getClass().getName());
 									DataMessage m = (DataMessage) o;
 									//set missing fields
 									m.setReceivedTimestamp(Calendar.getInstance().getTime());
 									m.setSourceMessage(ObjectParser.getParsedMessage());
 									//store it !
 									DBServiceImpl.store(m);
+									logger.finer("Object stored");
 									//update devices
 									int devAddr = m.getSourceAddress();
 									if(devAddr!= 0){
 										manageDevice(devAddr);
 									}
 								}
+								else logger.severe("Object parsed from serial com is of class "
+								+o.getClass().getName()+" that is not a DataMessage");
 							}
 						}
 
 					} catch (jssc.SerialPortException e) {
 						//Nothing to do here
+						logger.log(Level.WARNING, "Error while reading serial event", e);
 					}
 				}
 			}
@@ -169,8 +189,10 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	@Override
 	public void sendData(String data) throws SerialPortException {
 		try {
+			logger.fine("Sending data on com port: "+data);
 			port.writeString(data);
 		} catch (jssc.SerialPortException e) {
+			logger.log(Level.WARNING, "Error while sending data on com port", e);
 			throw new SerialPortException(e.getMessage());
 		}
 	}
@@ -184,6 +206,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 			obset = query.execute();
 		} catch(Exception ex) {
 			//Nothing to do
+			logger.log(Level.WARNING, "Error while trying to look for existing device with address "+address, ex);
 		}
 
 		if((obset == null) || (obset.size() == 0)) {

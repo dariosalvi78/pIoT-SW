@@ -1,45 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
               http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-         version="2.5"
-         xmlns="http://java.sun.com/xml/ns/javaee">
+	version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
 
-  <!-- Servlets -->
-  <servlet>
-    <servlet-name>serialServlet</servlet-name>
-    <servlet-class>pIoT.server.SerialServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>serialServlet</servlet-name>
-    <url-pattern>/pIoTServer/serial</url-pattern>
-  </servlet-mapping>
-  
-  <servlet>
-    <servlet-name>DBServlet</servlet-name>
-    <servlet-class>pIoT.server.DBServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>DBServlet</servlet-name>
-    <url-pattern>/pIoTServer/DB</url-pattern>
-  </servlet-mapping>
- 
-  <servlet>
-    <servlet-name>ActionsServlet</servlet-name>
-    <servlet-class>pIoT.server.ActionsServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>ActionsServlet</servlet-name>
-    <url-pattern>/pIoTServer/actions</url-pattern>
-  </servlet-mapping>
-  
-  
-  <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>pIoTServer.html</welcome-file>
-  </welcome-file-list>
+	<!-- Servlets -->
+
+	<!-- remote logging -->
+	<servlet>
+		<servlet-name>remoteLogging</servlet-name>
+		<servlet-class>com.google.gwt.logging.server.RemoteLoggingServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>remoteLogging</servlet-name>
+		<url-pattern>/pIoTServer/remote_logging</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>serialServlet</servlet-name>
+		<servlet-class>pIoT.server.SerialServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>serialServlet</servlet-name>
+		<url-pattern>/pIoTServer/serial</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>DBServlet</servlet-name>
+		<servlet-class>pIoT.server.DBServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DBServlet</servlet-name>
+		<url-pattern>/pIoTServer/DB</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ActionsServlet</servlet-name>
+		<servlet-class>pIoT.server.ActionsServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ActionsServlet</servlet-name>
+		<url-pattern>/pIoTServer/actions</url-pattern>
+	</servlet-mapping>
+
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>pIoTServer.html</welcome-file>
+	</welcome-file-list>
 
 </web-app>
