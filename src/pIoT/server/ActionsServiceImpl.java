@@ -45,7 +45,7 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 	@Override
 	public void sendNotification(Notification not) {
 		storeNotification(not);
-		logger.fine("Notification stored: "+not.getMessage());
+		logger.info("Notification stored: "+not.getMessage());
 	}
 
 	public static void storeNotification(Notification not){
@@ -71,12 +71,12 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 		existingn.setFixed(true);
 		DBServiceImpl.getDB().store(existingn);
 		DBServiceImpl.getDB().commit();
-		logger.fine("Notification fixed: "+n.getMessage());
+		logger.info("Notification fixed: "+n.getMessage());
 	}
 
 	@Override
 	public void sendMessage(ActionMessage mess) throws pIoT.shared.SerialPortException {
-		logger.fine("Sending action message "+mess);
+		logger.info("Sending action message "+mess);
 
 		if(SerialServiceImpl.getPort().isOpened()){
 			Gson gson = new Gson();
@@ -84,7 +84,6 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 			jsonmess+= gson.toJson(mess);
 			jsonmess += " }";
 			try {
-				System.out.println("Sending message "+jsonmess);
 				SerialServiceImpl.getPort().writeString(jsonmess);
 			} catch (SerialPortException e) {
 				throw new pIoT.shared.SerialPortException(e);

@@ -82,7 +82,7 @@ public class ObjectParser {
 							String jsonStr = stringBuffer.substring(startObjectIndex, i +1);
 							String dataname = getNameOfJsonObject(jsonStr);
 							String content = stringBuffer.substring(startContentIndex, endContentIndex +1);
-							logger.fine("Parsing string "+jsonStr+" associated to class name "+dataname);
+							logger.info("Parsing string "+jsonStr+" associated to class name "+dataname);
 							Class<?> cl = getClassFromSimpleName(dataname);
 							Gson gson = new Gson();
 							Object retVal = gson.fromJson(content, cl);
