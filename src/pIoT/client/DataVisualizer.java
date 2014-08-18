@@ -14,6 +14,7 @@
  */
 package pIoT.client;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -297,7 +298,7 @@ public class DataVisualizer {
 				};
 			}
 		}
-		else if(value instanceof Byte){
+		else if(value instanceof Byte){ //Byte
 			Byte b = (Byte) value;
 			final TextBox tb = new TextBox();
 			tb.setMaxLength(3);
@@ -315,7 +316,7 @@ public class DataVisualizer {
 				}
 			};
 		}
-		else if(value instanceof Character){
+		else if(value instanceof Character){ //Char
 			Character c = (Character) value;
 			final TextBox tb = new TextBox();
 			tb.setMaxLength(1);
@@ -333,14 +334,17 @@ public class DataVisualizer {
 				}
 			};
 		}
-		else if((value instanceof Integer) ||
+		else if((value instanceof Integer) || //Number
 				(value instanceof Long)||
 				(value instanceof Short)||
 				(value instanceof Float)||
 				(value instanceof Double)){
 			final HorizontalPanel hp = new HorizontalPanel();
 			final TextBox tb = new TextBox();
-			tb.setText(value.toString());
+			if(value instanceof Float || value instanceof Double)
+				tb.setText(new DecimalFormat("#.##").format(value));
+			else
+				tb.setText(value.toString());
 			tb.setReadOnly(!editable);
 			hp.add(tb);
 			if(allowplot){ //TODO: do something with plots
