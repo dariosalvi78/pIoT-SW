@@ -23,6 +23,7 @@ import pIoT.client.services.SerialService;
 import pIoT.shared.Node;
 import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.examples.Error;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
 import pIoT.shared.messages.examples.SwitchState;
@@ -56,7 +57,8 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(Hello.class);
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
-
+		ObjectParser.addClassType(Error.class);
+		
 
 		portName = Configs.retrieveConfigs().getComPort();
 
@@ -161,6 +163,14 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 									if(devAddr!= 0){
 										manageDevice(devAddr);
 									}
+								}
+								else if(o instanceof Error){
+									Error er = (Error) o;
+									if(er.getSeverity() == 0)
+										logger.info(er.getMessage());
+									else if(er.getSeverity() == 1)
+										logger.info(er.getMessage());
+									else logger.severe(er.getMessage());
 								}
 								else logger.severe("Object parsed from serial com is of class "
 								+o.getClass().getName()+" that is not a DataMessage");
