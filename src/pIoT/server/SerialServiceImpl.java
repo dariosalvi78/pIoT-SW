@@ -26,6 +26,7 @@ import pIoT.shared.messages.DataMessage;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
 import pIoT.shared.messages.examples.SwitchState;
+import pIoT.shared.messages.garden.Garden;
 import pIoT.shared.notifications.NewDeviceNotification;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -56,7 +57,6 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
 
-		
 
 		portName = Configs.retrieveConfigs().getComPort();
 
@@ -84,7 +84,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 			res.add(ports[i]);
 			logmessage +=ports[i]+" ";
 		}
-		logger.log(Level.FINE, logmessage);
+		logger.info(logmessage);
 		return res;
 	}
 
@@ -97,11 +97,11 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	public boolean startStop(String portname) throws SerialPortException {
 		try {
 			if(port.isOpened()){
-				logger.log(Level.INFO, "Com port "+port.getPortName()+" stopped");
+				logger.info("Com port "+port.getPortName()+" stopped");
 				stop();
 				return false;
 			} else {
-				logger.log(Level.INFO, "Com port "+port.getPortName()+" started");
+				logger.info("Com port "+port.getPortName()+" started");
 				start(portname);
 				return true;
 			}
@@ -137,7 +137,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 					try {
 						String str = port.readString();
 						if(str != null){
-							logger.finer("Com port says: "+str);
+							logger.info("Com port says: "+str);
 							//Accumulate only if requests are newer than 10 seconds
 							//otherwise just rewrite the string
 							long now = Calendar.getInstance().getTimeInMillis();
@@ -148,7 +148,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 							Object o = ObjectParser.parse(str);
 							if(o!= null){
 								if(o instanceof DataMessage){
-									logger.fine("Object parsed from serial com of class " + o.getClass().getName());
+									logger.info("Object parsed from serial com of class " + o.getClass().getName());
 									DataMessage m = (DataMessage) o;
 									//set missing fields
 									m.setReceivedTimestamp(Calendar.getInstance().getTime());
@@ -189,7 +189,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	@Override
 	public void sendData(String data) throws SerialPortException {
 		try {
-			logger.fine("Sending data on com port: "+data);
+			logger.info("Sending data on com port: "+data);
 			port.writeString(data);
 		} catch (jssc.SerialPortException e) {
 			logger.log(Level.WARNING, "Error while sending data on com port", e);
