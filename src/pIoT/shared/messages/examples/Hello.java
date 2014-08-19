@@ -28,17 +28,19 @@ public class Hello extends DataMessage {
 	private float Vcc;
 	private float temperature;
 	private long operationTime;
+	private int unsentMessages;
 	
 	public Hello() {
 	}
 	
 	
 	public Hello(Date receivedTimestamp, String sourceMessage,
-			int sourceAddress, float vcc, float temperature, long operationTime) {
+			int sourceAddress, float vcc, float temperature, long operationTime, int unsentMessages) {
 		super(receivedTimestamp, sourceMessage, sourceAddress);
-		Vcc = vcc;
+		this.Vcc = vcc;
 		this.temperature = temperature;
 		this.operationTime = operationTime;
+		this.unsentMessages = unsentMessages;
 	}
 
 
@@ -64,5 +66,13 @@ public class Hello extends DataMessage {
 
 	public void setOperationTime(long operationTime) {
 		this.operationTime = operationTime;
+	}
+	
+	public int getUnsentMessages(){
+		return this.unsentMessages;
+	}
+	
+	public void setUnsentMessages(int ums){
+		this.unsentMessages = ums;
 	}
 }
