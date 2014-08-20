@@ -103,7 +103,7 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 		if(currentMessage == null)
 			return;
 
-		messagesPanel.add(DataVisualizer.renderObject(currentMessage, true, false, "Send", new UpdateHandler() {
+		messagesPanel.add(DataVisualizer.renderObject(currentMessage, true, false, null, "Send", new UpdateHandler() {
 			
 			@Override
 			public void handle(Object o) {

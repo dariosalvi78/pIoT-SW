@@ -186,11 +186,9 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 			@Override
 			public void onSuccess(Integer result) {
 				totalItems = result;
-
-				String deviceName = devices.getItemText(devices.getSelectedIndex());
-
-				if(deviceName.equalsIgnoreCase("All"))
-					deviceName = null;
+				
+				String devn = devices.getItemText(devices.getSelectedIndex());
+				final String deviceName = devn.equalsIgnoreCase("All")? null: devn;
 
 				//Get multiplier
 				int multiplier;
@@ -236,7 +234,11 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 						for(DataMessage mess : result){
 							final Date originalTimestamp = new Date(mess.getReceivedTimestamp().getTime());
-							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, "Update", new UpdateHandler() {
+							String exportlink;
+							if(deviceName!= null)
+								exportlink = "/pIoTServer/export/devicename="+deviceName+"&dataname="+currentClass;
+							else exportlink = "/pIoTServer/export/dataname="+currentClass;
+							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, exportlink, "Update", new UpdateHandler() {
 								
 								@Override
 								public void handle(Object o) {

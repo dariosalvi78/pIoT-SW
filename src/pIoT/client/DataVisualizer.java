@@ -43,8 +43,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Generic visualizer of objects. Uses reflection for exploring the structure of the
- * objects and represent them.
+ * Generic visualiser of objects. Uses reflection for exploring the structure of the
+ * objects and represents them in a widget.
  * @author Dario Salvi
  *
  */
@@ -54,11 +54,27 @@ public class DataVisualizer {
 		public void handle(Object o);
 	}
 
-	public static Widget renderObject(Object object, boolean editable, boolean allowplot, String setButtonText, UpdateHandler handler){
-		return renderObject(object, editable, allowplot, setButtonText, handler, new ArrayList<Runnable>());
+	/**
+	 * Renders a generic object using reflection
+	 * @param object the object to be rendered
+	 * @param editable if true the widget allows editing the fields
+	 * @param allowplot if true a "export" and "plot" link is added to numeric fields,
+	 * except source and destination address
+	 * @param exportlink the base link for the exporting servlet, this visualiser will
+	 * add to it the names of the fields preceded by a point
+	 * @param setButtonText the text to be put in the button that saves the edits
+	 * @param handler this is used to pass the newly edited object
+	 * @return a Widget that represents the object
+	 */
+	public static Widget renderObject(Object object, 
+			boolean editable, boolean allowplot, String exportlink,
+			String setButtonText, UpdateHandler handler){
+		return renderObject(object, editable, allowplot, exportlink, setButtonText, handler, new ArrayList<Runnable>());
 	}
 
-	private static Widget renderObject(final Object object, boolean editable, boolean allowplot, String setButtonText, final UpdateHandler handler, final ArrayList<Runnable> fieldchangers){
+	private static Widget renderObject(final Object object, 
+			boolean editable, boolean allowplot, String exportLink,
+			String setButtonText, final UpdateHandler handler, final ArrayList<Runnable> fieldchangers){
 		DecoratorPanel decP = new DecoratorPanel();
 
 		FlexTable layout = new FlexTable();
@@ -71,7 +87,7 @@ public class DataVisualizer {
 		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
 		layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
 
-		int lastrow = setFieldRows(layout, object, editable, allowplot, fieldchangers);
+		int lastrow = setFieldRows(layout, object, editable, allowplot, exportLink, fieldchangers);
 
 		if((editable) && (setButtonText != null) && (handler != null)){
 			Button setButton = new Button(setButtonText);
@@ -99,7 +115,9 @@ public class DataVisualizer {
 	}
 
 
-	private static int setFieldRows(FlexTable layout, final Object object, boolean editable, boolean allowplot, final ArrayList<Runnable> fieldchangers){
+	private static int setFieldRows(FlexTable layout, final Object object, 
+			boolean editable, boolean allowplot, String exportlink,
+			final ArrayList<Runnable> fieldchangers){
 		int fieldN = 1;
 
 		Class<?> clazz = object.getClass();
@@ -127,7 +145,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false);
+						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName);
 						dp.setContent(md.getWidget());
 						fieldchangers.add(new Runnable() {
 							@Override
@@ -143,7 +161,7 @@ public class DataVisualizer {
 					} else{ //short text
 						layout.setHTML(fieldN, 0, fieldName);
 
-						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false);
+						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName);
 						layout.setWidget(fieldN, 1, md.getWidget());
 						fieldchangers.add(new Runnable() {
 							@Override
@@ -160,7 +178,7 @@ public class DataVisualizer {
 					boolean plot = allowplot;
 					if(fieldName.equalsIgnoreCase("sourceAddress"))
 						plot = false;
-					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot);
+					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot, exportlink+"."+fieldName);
 					layout.setWidget(fieldN, 1, md.getWidget());
 					fieldchangers.add(new Runnable() {
 						@Override
@@ -191,7 +209,7 @@ public class DataVisualizer {
 							if(isBasic(element)){
 								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
 
-								final BasicTypeModifier md = renderBasicType(element, editable, allowplot);
+								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName);
 								layout.setWidget(fieldN, 1, md.getWidget());
 								fieldchangers.add(new Runnable() {
 									@Override
@@ -207,7 +225,7 @@ public class DataVisualizer {
 								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
 								dp.setAnimationEnabled(true);
 
-								final BasicTypeModifier md = renderBasicType(element, editable, allowplot);
+								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName);
 								dp.setContent(md.getWidget());
 								fieldchangers.add(new Runnable() {
 									@Override
@@ -230,7 +248,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						dp.setContent(renderObject(fieldValue, editable, allowplot, null, null, fieldchangers));
+						dp.setContent(renderObject(fieldValue, editable, allowplot, exportlink+"."+fieldName, null, null, fieldchangers));
 
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
@@ -262,7 +280,7 @@ public class DataVisualizer {
 				(o instanceof Boolean);
 	}
 
-	private static BasicTypeModifier renderBasicType(final Object value, boolean editable, boolean allowplot){
+	private static BasicTypeModifier renderBasicType(final Object value, boolean editable, boolean allowplot, String exportlink){
 
 		if(value instanceof String) { //String
 			final String text = (String) value;
@@ -348,9 +366,10 @@ public class DataVisualizer {
 			tb.setReadOnly(!editable);
 			hp.add(tb);
 			if(allowplot){ //TODO: do something with plots
-				Anchor plot = new Anchor("plot");
-				plot.getElement().getStyle().setMarginLeft(5, Unit.PX);
-				hp.add(plot);
+				Anchor export = new Anchor("export");
+				export.setHref(exportlink);
+				export.getElement().getStyle().setMarginLeft(5, Unit.PX);
+				hp.add(export);
 			}
 			return new BasicTypeModifier() {
 				@Override

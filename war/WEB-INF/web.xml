@@ -16,6 +16,7 @@
 		<url-pattern>/pIoTServer/remote_logging</url-pattern>
 	</servlet-mapping>
 
+	<!-- Services -->
 	<servlet>
 		<servlet-name>serialServlet</servlet-name>
 		<servlet-class>pIoT.server.SerialServiceImpl</servlet-class>
@@ -43,6 +44,14 @@
 		<url-pattern>/pIoTServer/actions</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>ExportDataServlet</servlet-name>
+		<servlet-class>pIoT.server.ExportDataServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExportDataServlet</servlet-name>
+		<url-pattern>/pIoTServer/export</url-pattern>
+	</servlet-mapping>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>
