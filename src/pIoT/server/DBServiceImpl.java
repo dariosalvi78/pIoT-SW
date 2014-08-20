@@ -16,6 +16,7 @@ package pIoT.server;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,7 @@ import pIoT.client.services.DBService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.notifications.Notification;
 
 import com.db4o.Db4oEmbedded;
@@ -72,6 +74,8 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	public DBServiceImpl() {
 		super();
 		logger.info("DB service started");
+		
+		
 	}
 
 	@Override
@@ -107,6 +111,40 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			return false;
 		}
 	}
+	
+	public static <T> ArrayList<T> getDataMessages(final Class<T> T, final String deviceName, final int limitstart, final int limitend)
+			throws DataBaseException, IllegalArgumentException {
+		int devAddress = 0;
+		if(deviceName != null){
+			//Get the source address of the device
+			Query query = getDB().query();
+			query.constrain(Node.class);
+			query.descend("name").constrain(deviceName);
+
+			ObjectSet<Node> devicesset = query.execute();
+			if(devicesset.isEmpty())
+				throw new IllegalArgumentException("The name provided for the device "+deviceName+" does not exist");
+
+			//Get the first element (only one should exist)
+			Node device = devicesset.next();
+			devAddress = device.getAddress();
+		}
+		ArrayList<T> retval = new ArrayList<T>();
+
+		//Query for the messages
+		Query query= getDB().query();
+		query.constrain(T);
+		query.descend("receivedTimestamp").orderDescending();
+		if(deviceName != null){
+			query.descend("sourceAddress").constrain(devAddress);
+		}
+
+		ObjectSet<T> messagesset = query.execute();
+		for (final T mess: limit(messagesset, limitstart, limitend)) {
+			retval.add(mess);
+		}
+		return retval;
+	}
 
 	@Override
 	public ArrayList<DataMessage> getDataMessages(final String className, final String deviceName, final int limitstart, final int limitend)
@@ -131,7 +169,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			if(devicesset.isEmpty())
 				throw new IllegalArgumentException("The name provided for the device "+deviceName+" does not exist");
 
-			//Get the first element (only should exist)
+			//Get the first element (only one should exist)
 			Node device = devicesset.next();
 			devAddress = device.getAddress();
 		}
