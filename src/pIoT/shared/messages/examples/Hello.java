@@ -25,7 +25,7 @@ import pIoT.shared.messages.DataMessage;
  */
 public class Hello extends DataMessage {
 
-	private float Vcc;
+	private float vcc;
 	private float temperature;
 	private long operationTime;
 	private int unsentMessages;
@@ -37,7 +37,7 @@ public class Hello extends DataMessage {
 	public Hello(Date receivedTimestamp, String sourceMessage,
 			int sourceAddress, float vcc, float temperature, long operationTime, int unsentMessages) {
 		super(receivedTimestamp, sourceMessage, sourceAddress);
-		this.Vcc = vcc;
+		this.vcc = vcc;
 		this.temperature = temperature;
 		this.operationTime = operationTime;
 		this.unsentMessages = unsentMessages;
@@ -45,11 +45,11 @@ public class Hello extends DataMessage {
 
 
 	public float getVcc() {
-		return Vcc;
+		return vcc;
 	}
 
 	public void setVcc(float vcc) {
-		Vcc = vcc;
+		this.vcc = vcc;
 	}
 
 	public float getTemperature() {
