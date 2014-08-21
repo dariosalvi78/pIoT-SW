@@ -98,7 +98,7 @@ for a light standalone server you can use [Jetty](http://www.eclipse.org/jetty/)
 *  In Eclipse, right button on the project's icon -> Google -> GWT compile
 *  Copy the war folder of the Eclise project into webapps folder of jetty.
 *  Rename the folder from war to pIoT.
-*  Execute ```java -jar start.jar``` in a console at the root folder of jetty. If you want logging support on file execute ```java -DVERBOSE -jar start.jar etc/jetty-logging.xml```
+*  Execute ```java -jar start.jar``` in a console at the root folder of jetty. If you want logging support on file execute ```java -DVERBOSE -jar start.jar etc/jetty-logging.xml```. On some linuxes the USB port may be accessible only by root, in that case add a ```sudo``` before the command.
 *  On your browser, go to http://localhost:8080/pIoT/
 
 have fun!

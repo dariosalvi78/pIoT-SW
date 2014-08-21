@@ -30,14 +30,29 @@ public class ExtendedDataMessage extends DataMessage {
 	
 	private ExtendedData data;
 	
+	public static class NestedData{
+		private String nest;
+		public NestedData() {
+		}
+		public String getNest() {
+			return nest;
+		}
+		public void setNest(String nest) {
+			this.nest = nest;
+		}
+	}
+	
+	private NestedData nested;
+	
 	public ExtendedDataMessage() {
 	}
 
 	public ExtendedDataMessage(Date receivedTimestamp, String sourceMessage,
-			int sourceaddress, String extendedMessage, ExtendedData data) {
+			int sourceaddress, String extendedMessage, ExtendedData data, NestedData nested) {
 		super(receivedTimestamp, sourceMessage, sourceaddress);
 		this.extendedMessage = extendedMessage;
 		this.data = data;
+		this.nested = nested;
 	}
 
 	public String getExtendedMessage() {
@@ -56,7 +71,16 @@ public class ExtendedDataMessage extends DataMessage {
 		this.data = data;
 	}
 	
+	public NestedData getNested() {
+		return nested;
+	}
+
+	public void setNested(NestedData nested) {
+		this.nested = nested;
+	}
+
 	public String toString(){
-		return "ext message: "+ extendedMessage+" data: "+ data.toString();
+		return "ext message: "+ extendedMessage+" data: "+ data.toString()
+				+ " nested: "+ nested.nest;
 	}
 }

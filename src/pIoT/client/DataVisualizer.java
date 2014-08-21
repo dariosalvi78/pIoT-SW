@@ -14,7 +14,6 @@
  */
 package pIoT.client;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.i18n.client.NumberFormat;
 
 /**
  * Generic visualiser of objects. Uses reflection for exploring the structure of the
@@ -359,10 +360,16 @@ public class DataVisualizer {
 				(value instanceof Double)){
 			final HorizontalPanel hp = new HorizontalPanel();
 			final TextBox tb = new TextBox();
-			if(value instanceof Float || value instanceof Double)
-				tb.setText(new DecimalFormat("#.##").format(value));
-			else
+			if(value instanceof Float){
+				Float d = (Float) value;
+				tb.setText(NumberFormat.getFormat("#.##").format(d));
+			} else if(value instanceof Double){
+				Double d = (Double) value;
+				tb.setText(NumberFormat.getFormat("#.##").format(d));
+			}
+			else{
 				tb.setText(value.toString());
+			}
 			tb.setReadOnly(!editable);
 			hp.add(tb);
 			if(allowplot){ //TODO: do something with plots

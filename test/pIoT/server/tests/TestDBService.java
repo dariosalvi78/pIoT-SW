@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import pIoT.client.tests.ExtendedData;
 import pIoT.client.tests.ExtendedDataMessage;
+import pIoT.client.tests.ExtendedDataMessage.NestedData;
 import pIoT.server.DBServiceImpl;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
@@ -130,7 +131,7 @@ public class TestDBService {
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
 		DBServiceImpl.getDB().store(mesg2);
 		
-		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null);
+		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null, null);
 		DBServiceImpl.getDB().store(mesg3);
 		
 		int dms = db.getClassStoredCount(DataMessage.class.getName());
@@ -149,7 +150,7 @@ public class TestDBService {
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
 		DBServiceImpl.getDB().store(mesg2);
 		
-		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null);
+		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null, null);
 		DBServiceImpl.getDB().store(mesg3);
 		
 		List<String> datanames = db.getDataMessageClassNames();
@@ -168,7 +169,7 @@ public class TestDBService {
 		ExtendedData data = new ExtendedData();
 		data.setABool(true);
 		data.setAnArray(new int[]{1,2,3,4});
-		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data);
+		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data, null);
 		DBServiceImpl.getDB().store(mesg3);
 		
 		List<DataMessage> messageses = db.getDataMessages(ExtendedDataMessage.class.getName(), "dev", -1, -1);
@@ -179,6 +180,23 @@ public class TestDBService {
 		for(int i=0; i<4;i++){
 			assertEquals(mesg3.getData().getAnArray()[i], ver.getData().getAnArray()[i]);
 		}
+	}
+	
+	@Test
+	public void testNestedData() throws Exception {
+		Date now = Calendar.getInstance().getTime();
+		Node dev = new Node(1, "dev", "home");
+		DBServiceImpl.getDB().store(dev);
+		
+		NestedData nested = new NestedData();
+		nested.setNest("neststring");
+		ExtendedDataMessage mesg = new ExtendedDataMessage(now, "message3", 1, "extended message", null, nested);
+		DBServiceImpl.getDB().store(mesg);
+		
+		List<DataMessage> messageses = db.getDataMessages(ExtendedDataMessage.class.getName(), "dev", -1, -1);
+		assertEquals(1, messageses.size());
+		ExtendedDataMessage ver = (ExtendedDataMessage) messageses.get(0);
+		assertEquals(mesg.getNested().getNest(), ver.getNested().getNest());
 	}
 
 	

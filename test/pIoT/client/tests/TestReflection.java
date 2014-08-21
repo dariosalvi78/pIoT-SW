@@ -23,6 +23,7 @@ import java.util.List;
 import org.dt.reflector.client.PropertyUtils;
 import org.dt.reflector.client.Reflector;
 
+import pIoT.client.tests.ExtendedDataMessage.NestedData;
 import pIoT.shared.messages.DataMessage;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -41,7 +42,7 @@ public class TestReflection extends GWTTestCase {
 	    assertTrue(true);
 	  }
 	
-	public void testReflectionM(){
+	public void testReflectionSimple(){
 
 		DataMessage mess = new DataMessage(new Date(123456789),
 				"my message", 5);
@@ -58,7 +59,7 @@ public class TestReflection extends GWTTestCase {
 		assertEquals("my message", refl.get(mess, "sourceMessage"));
 	}
 	
-	public void testReflectionEM(){
+	public void testReflectionExtended(){
 		
 		ExtendedData ed = new ExtendedData();
 		ed.setABool(true);
@@ -69,8 +70,11 @@ public class TestReflection extends GWTTestCase {
 		list.add(3);
 		list.add(4);
 		ed.setAList(list);
+		
+		NestedData nested = new NestedData();
+		nested.setNest("a nest");
 		ExtendedDataMessage emess = new ExtendedDataMessage(new Date(123456789),
-				"my message", 5, "ext message", ed);
+				"my message", 5, "ext message", ed, nested);
 		
 		Class<?> clazz = emess.getClass();
 		Reflector refl = PropertyUtils.getReflector(clazz);
@@ -81,10 +85,12 @@ public class TestReflection extends GWTTestCase {
 		assertTrue(props.contains("extendedMessage"));
 		assertEquals("ext message", refl.get(emess, "extendedMessage"));
 		assertTrue(props.contains("data"));
+		assertTrue(props.contains("nested"));
 		
 		Object emd = refl.get(emess, "data");
 		assertNotNull(emd);
 		clazz = emd.getClass();
+		assertEquals(ExtendedData.class.getName(), clazz.getName());
 		refl = PropertyUtils.getReflector(clazz);
 		assertNotNull(refl);
 		props = Arrays.asList(refl.list(emd));
@@ -105,5 +111,17 @@ public class TestReflection extends GWTTestCase {
 		assertEquals(2, lst.get(1));
 		assertEquals(3, lst.get(2));
 		assertEquals(4, lst.get(3));
+		
+		refl = PropertyUtils.getReflector(emess.getClass());
+		
+		Object nsd = refl.get(emess, "nested");
+		assertNotNull(nsd);
+		clazz = nsd.getClass();
+		assertEquals(NestedData.class.getName(), clazz.getName());
+		refl = PropertyUtils.getReflector(clazz);
+		assertNotNull(refl);
+		props = Arrays.asList(refl.list(nsd));
+		assertTrue(props.contains("nest"));
+		assertEquals("a nest", refl.get(nsd, "nest"));
 	}
 }
