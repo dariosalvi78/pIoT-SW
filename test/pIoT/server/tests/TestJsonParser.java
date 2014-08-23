@@ -111,5 +111,22 @@ public class TestJsonParser {
 		assertEquals(10, m.getSourceAddress());
 	}
 	
+	@Test
+	public void testTimeout() throws InterruptedException{
+		ObjectParser.addClassType(DataMessage.class);
+		ObjectParser.TIMEOUT = 500;
+		String buff = null;
+		assertNull(ObjectParser.parse(buff));
+		buff = "{ \"DataMessage\": { \"s";
+		assertNull(ObjectParser.parse(buff));
+		buff = null;
+		assertNull(ObjectParser.parse(buff));
+		buff = "ourceAddress\" : 10 ";
+		assertNull(ObjectParser.parse(buff));
+		Thread.sleep(600);
+		buff = "} }\n";
+		assertNull(ObjectParser.parse(buff));
+	}
+	
 
 }

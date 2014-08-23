@@ -15,11 +15,11 @@
 package pIoT.server;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
-import com.google.gwt.core.shared.GWT;
 
 /**
  * Parses a flow of strings into objects, using JSON
@@ -32,6 +32,12 @@ public class ObjectParser {
 
 	private static String stringBuffer = "";
 	private static String lastMessage = "";
+	
+	/**
+	 * A timeout after which the buffer is reset.
+	 */
+	public static int TIMEOUT = 5000;
+	private static long lastTime = 0;
 	
 	private static ArrayList<Class<?>> supportedClasses = new ArrayList<>();
 
@@ -50,6 +56,14 @@ public class ObjectParser {
 	 * @return the instance of a supported class, or null
 	 */
 	public static Object parse(String piece) throws IllegalArgumentException{
+		//reset the buffer after timeout
+		long now = Calendar.getInstance().getTimeInMillis();
+		if((now - lastTime > TIMEOUT)){
+			reset();
+		}
+		lastTime = now;
+		
+		//analyse the buffer
 		if(piece != null)
 			stringBuffer += piece;
 		
@@ -151,6 +165,7 @@ public class ObjectParser {
 	}
 	
 	public static void reset(){
+		logger.info("Resetting serial buffer");
 		stringBuffer = "";
 	}
 }
