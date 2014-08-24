@@ -16,16 +16,8 @@ package pIoT.server.tests;
 
 import static org.junit.Assert.*;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +29,6 @@ import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
 import pIoT.shared.messages.examples.Hello;
 
-import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 
 public class TestDataExporter {
@@ -54,20 +45,20 @@ public class TestDataExporter {
 		Node node = new Node(123, "my node", "home");
 		db.store(node);
 		Hello data = new Hello(Calendar.getInstance().getTime(), 
-				"{\"just an example\"}", 123, 3, 24, 10, 0);
+				"{\"just an example\"}", 123, 3, 24, 10, 0, 0, 0);
 		db.store(data);
 		data = new Hello(Calendar.getInstance().getTime(), 
-				"{\"just an example\"}", 123, 2.99F, 24.3F, 30, 0);
+				"{\"just an example\"}", 123, 2.99F, 24.3F, 30, 0, 0, 0);
 		db.store(data);
 		db.commit();
 		
 		node = new Node(321, "another node", "bath");
 		db.store(node);
 		data = new Hello(Calendar.getInstance().getTime(), 
-				"{\"just an example\"}", 321, 2.8F, 32, 20, 0);
+				"{\"just an example\"}", 321, 2.8F, 32, 20, 0, 0L, 0L);
 		db.store(data);
 		data = new Hello(Calendar.getInstance().getTime(), 
-				"{\"just an example\"}", 321, 2.88F, 31.8F, 40, 0);
+				"{\"just an example\"}", 321, 2.88F, 31.8F, 40, 0, 0, 0);
 		db.store(data);
 		db.commit();
 	}

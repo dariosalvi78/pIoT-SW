@@ -28,19 +28,24 @@ public class Hello extends DataMessage {
 	private float vcc;
 	private float temperature;
 	private long operationTime;
-	private int unsentMessages;
-	
+	private long sentMessages;
+	private long unsentMessages;
+	private long receivedMessages;
+
 	public Hello() {
 	}
-	
-	
+
+
 	public Hello(Date receivedTimestamp, String sourceMessage,
-			int sourceAddress, float vcc, float temperature, long operationTime, int unsentMessages) {
+			int sourceAddress, float vcc, float temperature,
+			long operationTime, long sentMsgs, long unsentMsgs, long receivedMsgs) {
 		super(receivedTimestamp, sourceMessage, sourceAddress);
 		this.vcc = vcc;
 		this.temperature = temperature;
 		this.operationTime = operationTime;
-		this.unsentMessages = unsentMessages;
+		this.unsentMessages = unsentMsgs;
+		this.sentMessages = sentMsgs;
+		this.receivedMessages = receivedMsgs;
 	}
 
 
@@ -67,12 +72,28 @@ public class Hello extends DataMessage {
 	public void setOperationTime(long operationTime) {
 		this.operationTime = operationTime;
 	}
-	
-	public int getUnsentMessages(){
-		return this.unsentMessages;
+
+	public long getSentMessages() {
+		return sentMessages;
 	}
-	
-	public void setUnsentMessages(int ums){
-		this.unsentMessages = ums;
+
+	public void setSentMessages(long sentMessages) {
+		this.sentMessages = sentMessages;
+	}
+
+	public long getUnsentMessages() {
+		return unsentMessages;
+	}
+
+	public void setUnsentMessages(long unsentMessages) {
+		this.unsentMessages = unsentMessages;
+	}
+
+	public long getReceivedMessages() {
+		return receivedMessages;
+	}
+
+	public void setReceivedMessages(long receivedMessages) {
+		this.receivedMessages = receivedMessages;
 	}
 }

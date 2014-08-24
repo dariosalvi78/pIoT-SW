@@ -36,7 +36,7 @@ public class ObjectParser {
 	/**
 	 * A timeout after which the buffer is reset.
 	 */
-	public static int TIMEOUT = 5000;
+	public static int TIMEOUT = 2000;
 	private static long lastTime = 0;
 	
 	private static ArrayList<Class<?>> supportedClasses = new ArrayList<>();
