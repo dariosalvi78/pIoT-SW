@@ -27,7 +27,6 @@ import pIoT.shared.messages.examples.Error;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
 import pIoT.shared.messages.examples.SwitchState;
-import pIoT.shared.messages.garden.Garden;
 import pIoT.shared.notifications.NewDeviceNotification;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -58,7 +57,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
 		ObjectParser.addClassType(Error.class);
-		
+
 
 		portName = Configs.retrieveConfigs().getComPort();
 
@@ -148,7 +147,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 							else stringBuffer += str;
 
 							Object o = ObjectParser.parse(str);
-							if(o!= null){
+							while(o!= null){
 								if(o instanceof DataMessage){
 									logger.info("Object parsed from serial com of class " + o.getClass().getName());
 									DataMessage m = (DataMessage) o;
@@ -169,11 +168,14 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 									if(er.getSeverity() == 0)
 										logger.info(er.getMessage());
 									else if(er.getSeverity() == 1)
-										logger.info(er.getMessage());
+										logger.warning(er.getMessage());
 									else logger.severe(er.getMessage());
 								}
-								else logger.severe("Object parsed from serial com is of class "
-								+o.getClass().getName()+" that is not a DataMessage");
+								else{ logger.severe("Object parsed from serial com is of class "
+								+o.getClass().getName()+" that is not a DataMessage");}
+								
+								//re-parse, maybe there's still something in there
+								o = ObjectParser.parse("");
 							}
 						}
 
