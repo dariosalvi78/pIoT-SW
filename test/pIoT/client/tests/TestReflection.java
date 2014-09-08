@@ -119,7 +119,7 @@ public class TestReflection extends GWTTestCase {
 		clazz = nsd.getClass();
 		assertEquals(NestedData.class.getName(), clazz.getName());
 		refl = PropertyUtils.getReflector(clazz);
-		assertNotNull(refl);
+		assertNotNull(refl);//fails here
 		props = Arrays.asList(refl.list(nsd));
 		assertTrue(props.contains("nest"));
 		assertEquals("a nest", refl.get(nsd, "nest"));
