@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dt.reflector.client.PropertyUtils;
+import org.dt.reflector.client.Reflectable;
 import org.dt.reflector.client.Reflector;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -33,7 +34,7 @@ public class SimpleTestReflection extends GWTTestCase {
 		return "pIoT.pIoTServer_test";
 	}
 
-	public static class MyClass{
+	public static class MyClass implements Reflectable{
 		private int myInt;
 		private boolean myBool;
 		

@@ -16,6 +16,8 @@ package pIoT.client.tests;
 
 import java.util.Date;
 
+import org.dt.reflector.client.Reflectable;
+
 import pIoT.shared.messages.DataMessage;
 
 
@@ -30,7 +32,7 @@ public class ExtendedDataMessage extends DataMessage {
 	
 	private ExtendedData data;
 	
-	public static class NestedData{
+	public static class NestedData implements Reflectable{
 		private String nest;
 		public NestedData() {
 		}
