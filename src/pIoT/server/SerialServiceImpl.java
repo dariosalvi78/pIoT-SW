@@ -14,6 +14,10 @@
  */
 package pIoT.server;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -23,6 +27,7 @@ import pIoT.client.services.SerialService;
 import pIoT.shared.Node;
 import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.DataMessage;
+
 import pIoT.shared.messages.examples.Error;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
@@ -43,7 +48,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SerialServiceImpl extends RemoteServiceServlet implements SerialService {
 
 	private static Logger logger = Logger.getLogger(SerialServiceImpl.class.getName());
-
+	private static String serialLogFileName = "SerialLog.log";
+	private BufferedWriter serialWriter;
+	
 	private static SerialPort port;
 	private String portName;
 	private String stringBuffer = "";
@@ -57,6 +64,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
 		ObjectParser.addClassType(Error.class);
+		
 
 
 		portName = Configs.retrieveConfigs().getComPort();
@@ -70,8 +78,23 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 
 		port = new SerialPort(portName);
 		logger.info("Serial Service started");
+		
+		try {
+			serialWriter = new BufferedWriter(new FileWriter(new File(serialLogFileName)));
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Cannot start serial logging", e);
+		}
 	}
 
+	@Override
+	public void destroy(){
+		try {
+			serialWriter.close();
+		} catch (IOException e) {
+		}
+		super.destroy();
+	}
+	
 	public static SerialPort getPort(){
 		return port;
 	}
@@ -138,7 +161,11 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 					try {
 						String str = port.readString();
 						if(str != null){
-							logger.info("Com port says: "+str);
+							try {
+								serialWriter.write(str);
+							} catch (IOException e) {
+								logger.log(Level.WARNING, "Cannot write serial log", e);
+							}
 							//Accumulate only if requests are newer than 10 seconds
 							//otherwise just rewrite the string
 							long now = Calendar.getInstance().getTimeInMillis();
@@ -156,7 +183,6 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 									m.setSourceMessage(ObjectParser.getParsedMessage());
 									//store it !
 									DBServiceImpl.store(m);
-									logger.finer("Object stored");
 									//update devices
 									int devAddr = m.getSourceAddress();
 									if(devAddr!= 0){
