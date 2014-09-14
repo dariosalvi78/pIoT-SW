@@ -16,12 +16,13 @@ package pIoT.client;
 
 import java.util.ArrayList;
 
-import pIoT.client.DataVisualizer.UpdateHandler;
+import pIoT.client.DataVisualizer.UpdateDeleteHandler;
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
 import pIoT.client.services.ActionsService;
 import pIoT.client.services.ActionsServiceAsync;
 import pIoT.shared.messages.ActionMessage;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -103,10 +104,10 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 		if(currentMessage == null)
 			return;
 
-		messagesPanel.add(DataVisualizer.renderObject(currentMessage, true, false, null, "Send", new UpdateHandler() {
+		messagesPanel.add(DataVisualizer.renderObject(currentMessage, true, false, null, "Send", null, new UpdateDeleteHandler() {
 			
 			@Override
-			public void handle(Object o) {
+			public void update(Object o) {
 				
 				//Send the message
 				actions.sendMessage(currentMessage, new AsyncCallback<Void>() {
@@ -122,6 +123,10 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 						GWT.log("Cannot send message", caught);
 					}
 				});
+			}
+
+			@Override
+			public void delete(Object o) {
 			}
 		}));
 	}

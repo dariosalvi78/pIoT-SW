@@ -127,8 +127,39 @@ public class DeviceViewer extends Composite implements SectionChangeHandler{
 			}
 		});
 		layout.setWidget(4, 0, saveButt);
-		layout.getFlexCellFormatter().setColSpan(4, 0, 2);
 		layout.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasHorizontalAlignment.ALIGN_RIGHT);
+		
+		Button deleteButt = new Button("Delete");
+		deleteButt.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				ConfirmationDialog conf = new ConfirmationDialog(
+						"This will delete all messages, are you sure you want to proceed?", new ConfirmationDialog.ConfirmationHandler() {
+					
+					@Override
+					public void confirm(boolean confirmed) {
+						if(confirmed){
+							DB.deleteDevice(dev, new AsyncCallback<Void>() {
+								
+								@Override
+								public void onSuccess(Void result) {
+									update();
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									Window.alert("Cannot delete device. "+caught.getMessage());
+								}
+							});
+						}
+					}
+				});
+				conf.center();
+			}
+		});
+		layout.setWidget(4, 1, deleteButt);
+		layout.getFlexCellFormatter().setHorizontalAlignment(4, 1, HasHorizontalAlignment.ALIGN_RIGHT);
 		
 		frame.add(layout);
 		return frame;

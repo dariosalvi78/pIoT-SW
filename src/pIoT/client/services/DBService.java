@@ -41,9 +41,12 @@ public interface DBService extends RemoteService {
 	/**
 	 * Gets the number of instances of a given the classname.
 	 * @param className a full qualified class name
+	 * @param devicename name of the device if any
 	 * @return number of instances
+	 * @throws DataBaseException 
+	 * @throws IllegalArgumentException 
 	 */
-	public int getClassStoredCount(String className);
+	public int getClassStoredCount(String className, String devicename) throws IllegalArgumentException, DataBaseException;
 	
 	/**
 	 * Retrieves all the data sent by a pIoT device.
@@ -80,6 +83,18 @@ public interface DBService extends RemoteService {
 	/**
 	 * Gets the notifications that have not been fixed yet.
 	 */
-	ArrayList<Notification> getUnfixedNotifications() throws DataBaseException;	
+	ArrayList<Notification> getUnfixedNotifications() throws DataBaseException;
 	
+	/**
+	 * Deletes the node and all its associated data.
+	 * @param device
+	 */
+	public void deleteDevice(Node device) throws DataBaseException;
+	
+	/**
+	 * Deletes a data message.
+	 * @param dm
+	 * @throws DataBaseException
+	 */
+	public void deleteMessage(DataMessage dm) throws DataBaseException;
 }

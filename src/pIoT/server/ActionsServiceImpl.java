@@ -34,6 +34,7 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 		//ADD HERE EXAMPLES
 		exampleActionMessages.add(new SwitchSet(10, true));
 		
+		
 		logger.info("Action service started");
 	}
 
@@ -49,6 +50,7 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 	}
 
 	public static void storeNotification(Notification not){
+		logger.info("Storing notification: "+not.getMessage());
 		//Construct an example by removing the timestamp
 		Date originaldate = not.getCreated();
 		not.setCreated(null);
@@ -56,6 +58,8 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 			//No similar notification, then set the timestamp back and save
 			not.setCreated(originaldate);
 			DBServiceImpl.getDB().store(not);
+		} else {
+			logger.warning("Trying to store a notification that already exists");
 		}
 	}
 

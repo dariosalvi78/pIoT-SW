@@ -25,12 +25,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.db4o.ObjectSet;
+import com.db4o.query.Query;
+
 import pIoT.client.tests.ExtendedData;
 import pIoT.client.tests.ExtendedDataMessage;
 import pIoT.client.tests.ExtendedDataMessage.NestedData;
 import pIoT.server.DBServiceImpl;
+import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
+import pIoT.shared.notifications.NewDeviceNotification;
 
 public class TestDBService {
 
@@ -120,7 +125,7 @@ public class TestDBService {
 	}
 
 	@Test
-	public void testgetClassStoredCount(){
+	public void testgetClassStoredCount() throws IllegalArgumentException, DataBaseException{
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
 		DBServiceImpl.getDB().store(dev);
@@ -134,9 +139,11 @@ public class TestDBService {
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null, null);
 		DBServiceImpl.getDB().store(mesg3);
 		
-		int dms = db.getClassStoredCount(DataMessage.class.getName());
+		int dms = db.getClassStoredCount(DataMessage.class.getName(), null);
 		assertEquals(3, dms);
-		int edms = db.getClassStoredCount(ExtendedDataMessage.class.getName());
+		dms = db.getClassStoredCount(DataMessage.class.getName(), "dev");
+		assertEquals(3, dms);
+		int edms = db.getClassStoredCount(ExtendedDataMessage.class.getName(), null);
 		assertEquals(1, edms);
 	}
 	
@@ -200,5 +207,34 @@ public class TestDBService {
 	}
 
 	
-
+	@Test
+	public void testDeleteNode() throws DataBaseException{
+		Date now = Calendar.getInstance().getTime();
+		Node dev = new Node(1, "dev", "home");
+		DBServiceImpl.getDB().store(dev);
+		
+		ExtendedData data = new ExtendedData();
+		data.setABool(true);
+		data.setAnArray(new int[]{1,2,3,4});
+		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data, null);
+		DBServiceImpl.getDB().store(mesg3);
+		
+		NewDeviceNotification notif = new NewDeviceNotification(now, false, dev);
+		DBServiceImpl.getDB().store(notif);
+		DBServiceImpl.getDB().commit();
+		
+		db.deleteDevice(dev);
+		
+		Query query= DBServiceImpl.getDB().query();
+		query.constrain(ExtendedData.class);
+		query.descend("sourceAddress").constrain(1);
+		ObjectSet<ExtendedData> messagesset = query.execute();
+		assertEquals(0, messagesset.size());
+		
+		query= DBServiceImpl.getDB().query();
+		query.constrain(NewDeviceNotification.class);
+		query.descend("device").descend("address").constrain(1);
+		ObjectSet<NewDeviceNotification> notsset = query.execute();
+		assertEquals(0, notsset.size());
+	}
 }

@@ -17,7 +17,7 @@ package pIoT.client;
 import java.util.ArrayList;
 import java.util.Date;
 
-import pIoT.client.DataVisualizer.UpdateHandler;
+import pIoT.client.DataVisualizer.UpdateDeleteHandler;
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
 import pIoT.client.events.SectionChangeEvent.Section;
@@ -106,7 +106,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 				updateContent();
 			}
 		});
-		itemsN.addItem("1");
 		itemsN.addItem("5");
 		itemsN.addItem("10");
 		itemsN.addItem("20");
@@ -182,14 +181,14 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 		messagesPanel.add(new HTML("<h2>...retrieving and parsing data, please wait...</h2>"));
 
-		DB.getClassStoredCount(currentClass, new AsyncCallback<Integer>() {
+		String devn = devices.getItemText(devices.getSelectedIndex());
+		final String deviceName = devn.equalsIgnoreCase("All")? null: devn;
+		
+		DB.getClassStoredCount(currentClass, deviceName, new AsyncCallback<Integer>() {
 			@Override
 			public void onSuccess(Integer result) {
 				totalItems = result;
 				
-				String devn = devices.getItemText(devices.getSelectedIndex());
-				final String deviceName = devn.equalsIgnoreCase("All")? null: devn;
-
 				//Get multiplier
 				int multiplier;
 				int itemNSel = itemsN.getSelectedIndex();
@@ -213,7 +212,7 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 				if(multiplier <0)
 					text += "all";
 				else{
-					text += "from " + (startIndex+1) +" to " + ((totalItems < endIndex)? (totalItems) : (endIndex+1)) + " of "+ totalItems;
+					text += "from " + (startIndex+1) + " to " + ((totalItems < (endIndex+1))? (totalItems) : (endIndex+1)) + " of "+ totalItems;
 				}
 				indexes.setText(text);
 
@@ -236,12 +235,14 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 							final Date originalTimestamp = new Date(mess.getReceivedTimestamp().getTime());
 							String exportlink;
 							if(deviceName!= null)
-								exportlink = "/pIoTServer/export?devicename="+deviceName+"&dataname="+currentClass.replace('.', '/');
-							else exportlink = "/pIoTServer/export?dataname="+currentClass.replace('.', '/');
-							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, exportlink, "Update", new UpdateHandler() {
+								exportlink = "/pIoTServer/export?devicename=" + deviceName 
+								+ "&dataname=" + mess.getClass().getName().replace('.', '/');
+							else exportlink = "/pIoTServer/export?dataname=" + mess.getClass().getName().replace('.', '/');
+							
+							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, exportlink, "Update", "Delete", new UpdateDeleteHandler() {
 								
 								@Override
-								public void handle(Object o) {
+								public void update(Object o) {
 									DB.updateDataMessage(originalTimestamp, (DataMessage) o, new AsyncCallback<Void>() {
 
 										@Override
@@ -252,6 +253,22 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 										public void onFailure(Throwable caught) {
 											Window.alert("Cannot update message\n"+caught.getMessage());
 											GWT.log("Cannot update message", caught);
+										}
+									});
+								}
+
+								@Override
+								public void delete(Object o) {
+									DB.deleteMessage((DataMessage) o, new AsyncCallback<Void>() {
+
+										@Override
+										public void onSuccess(Void result) {
+											updateContent();
+										}
+										@Override
+										public void onFailure(Throwable caught) {
+											Window.alert("Cannot delete message.\n"+caught.getMessage());
+											GWT.log("Cannot delete message", caught);
 										}
 									});
 								}

@@ -16,7 +16,6 @@ package pIoT.server;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +24,7 @@ import pIoT.client.services.DBService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
-import pIoT.shared.messages.examples.Hello;
+import pIoT.shared.notifications.NewDeviceNotification;
 import pIoT.shared.notifications.Notification;
 
 import com.db4o.Db4oEmbedded;
@@ -40,10 +39,10 @@ import static pIoT.server.QueryUtils.limit;
 public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 
 	private static Logger logger = Logger.getLogger(DBServiceImpl.class.getName());
-	
+
 	private static ObjectContainer db;
 	public static String dbFileName = "DB";
-	
+
 	/**
 	 * Returns the object container, the DB
 	 */
@@ -62,7 +61,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		new File(dbFileName).delete();
 		db = null;
 	}
-	
+
 	/**
 	 * Stores and commits.
 	 */
@@ -74,8 +73,6 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 	public DBServiceImpl() {
 		super();
 		logger.info("DB service started");
-		
-		
 	}
 
 	@Override
@@ -96,11 +93,15 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		return retval;
 	}
 
-	public int getClassStoredCount(String className){
-		StoredClass stc = getDB().ext().storedClass(className);
-		if(stc == null)
-			return 0;
-		else return stc.instanceCount();
+	public int getClassStoredCount(String className, String devicename) throws IllegalArgumentException, DataBaseException{
+		if(devicename == null){
+			StoredClass stc = getDB().ext().storedClass(className);
+			if(stc == null)
+				return 0;
+			else return stc.instanceCount();
+		} else{
+			return getDataMessages(className, devicename, -1,-1).size();
+		}
 	}
 
 	private boolean isDataMessage(String className){
@@ -111,7 +112,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			return false;
 		}
 	}
-	
+
 	public static <T> ArrayList<T> getDataMessages(final Class<T> T, final String deviceName, final int limitstart, final int limitend)
 			throws DataBaseException, IllegalArgumentException {
 		int devAddress = 0;
@@ -196,7 +197,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		query.constrain(DataMessage.class);
 		query.descend("receivedTimestamp").constrain(originalTimestamp);
 		ObjectSet<DataMessage> os = query.execute();
-		
+
 		if(os.size() == 0)
 			throw new IllegalArgumentException("Trying to update a message that does not exist");
 		if(os.size() >1)
@@ -267,6 +268,46 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		}
 
 		return retval;
+	}
+
+	public void deleteDevice(Node device) throws DataBaseException{
+		//Find the device by address
+		Query query = getDB().query();
+		query.constrain(Node.class);
+		query.descend("address").constrain(device.getAddress());
+		ObjectSet<Node> os = query.execute();
+		if(os.size() == 0)
+			throw new IllegalArgumentException("Trying to delete a device with address "+device.getAddress()+" that does not exist");
+		Node existingdev = os.get(0);
+
+		//delete all associated data
+		query= getDB().query();
+		query.constrain(DataMessage.class);
+		query.descend("sourceAddress").constrain(existingdev.getAddress());
+
+		ObjectSet<DataMessage> messagesset = query.execute();
+		for(DataMessage ms : messagesset)
+			getDB().delete(ms);
+		
+		//delete notifications
+		query = getDB().query();
+		query.constrain(NewDeviceNotification.class);
+		query.descend("device").descend("sourceAddress").constrain(existingdev.getAddress());
+		ObjectSet<NewDeviceNotification> obset = query.execute();
+		for (final NewDeviceNotification not: obset) {
+			getDB().delete(not);
+		}
+
+		//delete the node
+		getDB().delete(existingdev);
+		getDB().commit();
+	}
+
+	@Override
+	public void deleteMessage(DataMessage dm) throws DataBaseException {
+		ObjectSet<DataMessage> os = getDB().queryByExample(dm);
+		for(DataMessage m : os)
+			getDB().delete(m);
 	}
 
 }

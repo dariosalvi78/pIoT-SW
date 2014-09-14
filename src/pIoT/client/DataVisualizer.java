@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.i18n.client.NumberFormat;
 
 /**
  * Generic visualiser of objects. Uses reflection for exploring the structure of the
@@ -51,8 +50,11 @@ import com.google.gwt.i18n.client.NumberFormat;
  */
 public class DataVisualizer {
 	
-	public static interface UpdateHandler{
-		public void handle(Object o);
+	public static interface UpdateDeleteHandler{
+		
+		public void update(Object o);
+		
+		public void delete(Object o);
 	}
 
 	/**
@@ -69,13 +71,14 @@ public class DataVisualizer {
 	 */
 	public static Widget renderObject(Object object, 
 			boolean editable, boolean allowplot, String exportlink,
-			String setButtonText, UpdateHandler handler){
-		return renderObject(object, editable, allowplot, exportlink, setButtonText, handler, new ArrayList<Runnable>());
+			String setButtonText, String deleteButtonText, UpdateDeleteHandler handler){
+		return renderObject(object, editable, allowplot, exportlink, setButtonText, deleteButtonText, handler, new ArrayList<Runnable>());
 	}
 
 	private static Widget renderObject(final Object object, 
 			boolean editable, boolean allowplot, String exportLink,
-			String setButtonText, final UpdateHandler handler, final ArrayList<Runnable> fieldchangers){
+			String setButtonText, String deleteButtonText,
+			final UpdateDeleteHandler handler, final ArrayList<Runnable> fieldchangers){
 		DecoratorPanel decP = new DecoratorPanel();
 
 		FlexTable layout = new FlexTable();
@@ -97,13 +100,20 @@ public class DataVisualizer {
 				public void onClick(ClickEvent event) {
 					for(Runnable ch : fieldchangers)
 						ch.run();
-					
-					handler.handle(object);
+					handler.update(object);
 				}
 			});
 			layout.setWidget(lastrow, 0, setButton);
-			layout.getFlexCellFormatter().setColSpan(lastrow, 0, 2);
-			layout.getFlexCellFormatter().setHorizontalAlignment(lastrow, 0, HasHorizontalAlignment.ALIGN_RIGHT);
+		}
+		if((editable) && (deleteButtonText != null) && (handler != null)){
+			Button deleteButton = new Button(deleteButtonText);
+			deleteButton.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					handler.delete(object);
+				}
+			});
+			layout.setWidget(lastrow, 1, deleteButton);
 		}
 
 		decP.add(layout);
@@ -249,7 +259,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						dp.setContent(renderObject(fieldValue, editable, allowplot, exportlink+"."+fieldName, null, null, fieldchangers));
+						dp.setContent(renderObject(fieldValue, editable, allowplot, exportlink+"."+fieldName, null, null, null, fieldchangers));
 
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);

@@ -76,7 +76,7 @@ public class StatisticsViewer extends Composite{
 	}
 	
 	public void update(){
-		DB.getClassStoredCount(DataMessage.class.getName(), new AsyncCallback<Integer>() {
+		DB.getClassStoredCount(DataMessage.class.getName(), null, new AsyncCallback<Integer>() {
 			
 			@Override
 			public void onSuccess(Integer result) {

@@ -32,7 +32,7 @@ public interface DBServiceAsync {
 	
 	void getDataMessageClassNames(AsyncCallback<ArrayList<String>> callback);
 	
-	void getClassStoredCount(String classname, AsyncCallback<Integer> callback);
+	void getClassStoredCount(String classname, String devicename, AsyncCallback<Integer> callback);
 
 	void getDataMessages(String className, String deviceName, int limitstart, int limitend, AsyncCallback<ArrayList<DataMessage>> callback);
 	
@@ -43,4 +43,8 @@ public interface DBServiceAsync {
 	void updateDevice(Node dev, AsyncCallback<Void> callback);
 	
 	void getUnfixedNotifications(AsyncCallback<ArrayList<Notification>> callback);
+	
+	void deleteDevice(Node device, AsyncCallback<Void> callback);
+	
+	void deleteMessage(DataMessage dm, AsyncCallback<Void> callback);
 }
