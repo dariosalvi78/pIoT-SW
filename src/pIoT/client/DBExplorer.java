@@ -233,12 +233,13 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 						for(DataMessage mess : result){
 							final Date originalTimestamp = new Date(mess.getReceivedTimestamp().getTime());
-							String exportlink;
+							String exportlink = Window.Location.getPath();
+							exportlink = exportlink.substring(0, exportlink.lastIndexOf("/"));
+							exportlink += "/pIoTServer/export?";
 							if(deviceName!= null)
-								exportlink = "/pIoTServer/export?devicename=" + deviceName 
+								exportlink +=  "devicename=" + deviceName 
 								+ "&dataname=" + mess.getClass().getName().replace('.', '/');
-							else exportlink = "/pIoTServer/export?dataname=" + mess.getClass().getName().replace('.', '/');
-							
+							else exportlink += "dataname=" + mess.getClass().getName().replace('.', '/');
 							messagesPanel.add(DataVisualizer.renderObject(mess, true, true, exportlink, "Update", "Delete", new UpdateDeleteHandler() {
 								
 								@Override
