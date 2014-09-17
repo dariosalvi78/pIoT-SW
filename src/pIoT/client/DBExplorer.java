@@ -253,7 +253,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 										@Override
 										public void onFailure(Throwable caught) {
 											Window.alert("Cannot update message\n"+caught.getMessage());
-											GWT.log("Cannot update message", caught);
 										}
 									});
 								}
@@ -269,7 +268,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 										@Override
 										public void onFailure(Throwable caught) {
 											Window.alert("Cannot delete message.\n"+caught.getMessage());
-											GWT.log("Cannot delete message", caught);
 										}
 									});
 								}
@@ -278,7 +276,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 					}
 					@Override
 					public void onFailure(Throwable caught) {
-						GWT.log("Cannot retrieve data of class name "+currentClass, caught);
 						Window.alert("Cannot retrieve data of class name "+currentClass+".\n" + caught.getMessage());
 						messagesPanel.clear();
 						messagesPanel.add(new HTML(caught.getMessage()));
@@ -333,7 +330,6 @@ public class DBExplorer extends ResizeComposite implements SectionChangeHandler{
 
 			@Override
 			public void onFailure(Throwable caught) {
-				GWT.log("Cannot get stored data names", caught);
 				Window.alert("Cannot get stored data names.\n" + caught.getMessage());
 			}
 		});

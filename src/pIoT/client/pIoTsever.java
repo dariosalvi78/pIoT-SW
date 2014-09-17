@@ -14,6 +14,8 @@
  */
 package pIoT.client;
 
+import java.util.logging.Logger;
+
 import pIoT.client.events.SectionChangeEvent;
 import pIoT.client.events.SectionChangeHandler;
 import pIoT.client.events.SectionChangeEvent.Section;
@@ -38,6 +40,8 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
  */
 public class pIoTsever implements EntryPoint, HasHandlers {
 
+	private static  Logger logger = Logger.getLogger(pIoTsever.class.getName());
+	
 	private HandlerManager handlerManager;
 	
 	public pIoTsever(){
@@ -45,6 +49,7 @@ public class pIoTsever implements EntryPoint, HasHandlers {
 	}
 	
 	public void onModuleLoad() {
+		logger.info("Client connected");
 		
 		// Create a tab panel with the main menu of the server
 		final TabLayoutPanel tbp = new TabLayoutPanel(30, Unit.PX);

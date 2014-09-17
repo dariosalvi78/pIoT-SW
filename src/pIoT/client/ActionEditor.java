@@ -42,7 +42,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class ActionEditor extends ResizeComposite implements SectionChangeHandler {
 
 	private final ActionsServiceAsync actions = GWT.create(ActionsService.class);
-
+	
 	//Menu stuff
 	ArrayList<ActionMessage> actionMessages;
 	final VerticalPanel datamenu = new VerticalPanel();
@@ -50,8 +50,6 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 	//Main area stuff
 	VerticalPanel messagesPanel = new VerticalPanel();
 	ActionMessage currentMessage = null;
-
-
 
 	/**
 	 * 
@@ -91,7 +89,6 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 			@Override
 			public void onFailure(Throwable caught) {
 				Window.alert("Cannot get example messages\n "+caught.getMessage());
-				GWT.log("Cannot get example messages", caught);
 			}
 		});
 
@@ -120,7 +117,6 @@ public class ActionEditor extends ResizeComposite implements SectionChangeHandle
 					@Override
 					public void onFailure(Throwable caught) {
 						Window.alert("Cannot send message\n"+caught.getMessage());
-						GWT.log("Cannot send message", caught);
 					}
 				});
 			}

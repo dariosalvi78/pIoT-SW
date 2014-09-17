@@ -51,7 +51,7 @@ public class ExportDataServiceImpl extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse response)
 			throws ServletException, IOException {
-		logger.info("Received export request: "+req.toString());
+		logger.fine("Received export request: "+req.toString());
 
 		String dataname = (String) req.getParameter("dataname");
 
@@ -101,7 +101,7 @@ public class ExportDataServiceImpl extends HttpServlet {
 		String propsStr ="";
 		for(int i=0; i< properties.length; i++)
 			propsStr+= (properties[i] + (i<properties.length-1? ".": ""));
-		logger.info("Querying data for exporting, class: "+classname+" properties: "+propsStr);
+		logger.finer("Querying data for exporting, class: "+classname+" properties: "+propsStr);
 		Class<?> cl = Class.forName(classname);
 		ArrayList<?> data = DBServiceImpl.getDataMessages(cl, devicename, -1, -1);
 
