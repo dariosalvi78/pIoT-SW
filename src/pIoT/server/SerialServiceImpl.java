@@ -24,22 +24,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import pIoT.client.services.SerialService;
-import pIoT.shared.Node;
 import pIoT.shared.SerialPortException;
 import pIoT.shared.messages.DataMessage;
-
 import pIoT.shared.messages.examples.Error;
 import pIoT.shared.messages.examples.Hello;
 import pIoT.shared.messages.examples.LightState;
 import pIoT.shared.messages.examples.SwitchState;
-import pIoT.shared.notifications.NewDeviceNotification;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortList;
 
-import com.db4o.ObjectSet;
-import com.db4o.query.Query;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -55,6 +50,15 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	private String portName;
 	private String stringBuffer = "";
 	private long lastRead = 0;
+	
+	/**
+	 * A generic handler of new arrived data.
+	 */
+	public interface DataHandler{
+		public void handle(DataMessage m) throws Exception;
+	}
+	
+	private static ArrayList<DataHandler> handlers = new ArrayList<>();
 
 	public SerialServiceImpl(){
 		//ADD HERE DATA MESSAGE CLASSES
@@ -64,8 +68,6 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		ObjectParser.addClassType(LightState.class);
 		ObjectParser.addClassType(SwitchState.class);
 		ObjectParser.addClassType(Error.class);
-		
-
 
 		portName = Configs.retrieveConfigs().getComPort();
 
@@ -77,13 +79,13 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		}
 
 		port = new SerialPort(portName);
-		logger.info("Serial Service started");
-		
 		try {
 			serialWriter = new BufferedWriter(new FileWriter(new File(serialLogFileName)));
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "Cannot start serial logging", e);
 		}
+		
+		logger.info("Serial Service started");
 	}
 
 	@Override
@@ -93,6 +95,14 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		} catch (IOException e) {
 		}
 		super.destroy();
+	}
+	
+	public static void addDataHandler(DataHandler h){
+		handlers.add(h);
+	}
+	
+	public static void removeHandler(DataHandler h){
+		handlers.remove(h);
 	}
 	
 	public static SerialPort getPort(){
@@ -176,17 +186,20 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 							Object o = ObjectParser.parse(str);
 							while(o!= null){
 								if(o instanceof DataMessage){
-									logger.info("Object parsed from serial com of class " + o.getClass().getName());
+									logger.fine("Object parsed from serial com of class " + o.getClass().getName());
 									DataMessage m = (DataMessage) o;
 									//set missing fields
 									m.setReceivedTimestamp(Calendar.getInstance().getTime());
 									m.setSourceMessage(ObjectParser.getParsedMessage());
 									//store it !
 									DBServiceImpl.store(m);
-									//update devices
-									int devAddr = m.getSourceAddress();
-									if(devAddr!= 0){
-										manageDevice(devAddr);
+									//call handlers
+									for(DataHandler h : handlers){
+										try {
+											h.handle(m);
+										} catch (Exception e) {
+											logger.log(Level.SEVERE, "Problem while handling data. "+e.getMessage(), e);;
+										}
 									}
 								}
 								else if(o instanceof Error){
@@ -227,7 +240,7 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 	@Override
 	public void sendData(String data) throws SerialPortException {
 		try {
-			logger.info("Sending data on com port: "+data);
+			logger.fine("Sending data on com port: "+data);
 			port.writeString(data);
 		} catch (jssc.SerialPortException e) {
 			logger.log(Level.WARNING, "Error while sending data on com port", e);
@@ -235,34 +248,4 @@ public class SerialServiceImpl extends RemoteServiceServlet implements SerialSer
 		}
 	}
 
-	private void manageDevice(int address){
-		Query query = DBServiceImpl.getDB().query();
-		query.constrain(Node.class);
-		query.descend("address").constrain(address);
-		ObjectSet<Node> obset = null;
-		try{
-			obset = query.execute();
-		} catch(Exception ex) {
-			//Nothing to do
-			logger.log(Level.WARNING, "Error while trying to look for existing device with address "+address, ex);
-		}
-
-		if((obset == null) || (obset.size() == 0)) {
-			//Store the new device
-			Node newdevice =new Node();
-			newdevice.setAddress(address);
-			newdevice.setLastContact(Calendar.getInstance().getTime());
-			DBServiceImpl.getDB().store(newdevice);
-
-			//Generate notification
-			NewDeviceNotification notif = new NewDeviceNotification(Calendar.getInstance().getTime(),
-					false, newdevice);
-			ActionsServiceImpl.storeNotification(notif);
-		} else {
-			//The device already exists, just update the lastcontact field
-			Node dev = obset.get(0); //should be only one
-			dev.setLastContact(Calendar.getInstance().getTime()); //update last contact
-			DBServiceImpl.getDB().store(dev);
-		}
-	}
 }
