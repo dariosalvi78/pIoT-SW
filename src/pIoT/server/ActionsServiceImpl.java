@@ -16,6 +16,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import pIoT.client.services.ActionsService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.messages.ActionMessage;
+import pIoT.shared.messages.MYSTUFF.ColorSet;
 import pIoT.shared.messages.examples.SwitchSet;
 import pIoT.shared.notifications.Notification;
 
@@ -34,6 +35,8 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 		//ADD HERE EXAMPLES
 		exampleActionMessages.add(new SwitchSet(10, true));
 		
+		//MY STUFF
+		exampleActionMessages.add(new ColorSet(10, 255, 100, 0, 10, 5000, 2));
 		
 		logger.info("Action service started");
 	}

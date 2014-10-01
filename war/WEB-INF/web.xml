@@ -52,7 +52,16 @@
 		<servlet-name>ExportDataServlet</servlet-name>
 		<url-pattern>/pIoTServer/export</url-pattern>
 	</servlet-mapping>
-
+	
+	<servlet>
+		<servlet-name>RulesServlet</servlet-name>
+		<servlet-class>pIoT.server.RulesServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RulesServlet</servlet-name>
+		<url-pattern>/pIoTServer/rules</url-pattern>
+	</servlet-mapping>
+	
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>pIoTServer.html</welcome-file>

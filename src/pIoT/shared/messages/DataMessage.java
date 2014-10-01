@@ -85,5 +85,7 @@ public class DataMessage implements Serializable, Reflectable {
 		this.sourceAddress = sourceAddress;
 	}
 	
-	
+	public String toString(){
+		return "Data message from "+sourceAddress+" \""+sourceMessage+"\" received on "+receivedTimestamp;
+	}
 }

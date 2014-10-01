@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import pIoT.client.services.DBService;
 import pIoT.shared.DataBaseException;
 import pIoT.shared.Node;
+import pIoT.shared.Rule;
 import pIoT.shared.messages.DataMessage;
 import pIoT.shared.notifications.NewDeviceNotification;
 import pIoT.shared.notifications.Notification;
@@ -223,7 +224,11 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			for (final Node dev: obset) {
 				retval.add(dev);
 			}
-		} catch(Exception ex){
+		}
+		catch(NullPointerException e){
+			//it means that there is no data with that characteristics
+		}
+		catch(Exception ex){
 			//Just return an empty list
 			logger.log(Level.WARNING, "Error while retrieving devices list", ex);
 		}
@@ -261,6 +266,9 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			for (final Notification dev: obset) {
 				retval.add(dev);
 			}
+		}
+		catch(NullPointerException e){
+			//it means that there is no data with that characteristics
 		}
 		catch(Exception ex){
 			//Don't do anything, return an empty list
@@ -310,4 +318,12 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			getDB().delete(m);
 	}
 
+	public static ArrayList<Rule> getRules() throws DataBaseException{
+		Query query = getDB().query();
+		query.constrain(Rule.class);
+		ObjectSet<Rule> obset = query.execute(); 
+		ArrayList<Rule> rules = new ArrayList<Rule>();
+		rules.addAll(obset);
+		return rules;
+	}
 }

@@ -148,7 +148,7 @@ public class ObjectParser {
 		return splitted[1];
 	}
 
-	private static Class<?> getClassFromSimpleName(String name){
+	public static Class<?> getClassFromSimpleName(String name){
 		for(Class<?> clazz : supportedClasses){
 			if(name.equalsIgnoreCase(clazz.getSimpleName())){
 				return clazz;

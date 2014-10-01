@@ -82,7 +82,7 @@ public class ExtendedDataMessage extends DataMessage {
 	}
 
 	public String toString(){
-		return "ext message: "+ extendedMessage+" data: "+ data.toString()
-				+ " nested: "+ nested.nest;
+		return "ext message: "+ extendedMessage+" data: "+ (data==null? "null":data.toString())
+				+ " nested: "+ (nested==null? "null":nested.nest);
 	}
 }

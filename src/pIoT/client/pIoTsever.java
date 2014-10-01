@@ -80,7 +80,8 @@ public class pIoTsever implements EntryPoint, HasHandlers {
 		addSectionChangeHandler(acts);
 		tbp.add(acts, "Actions");
 		
-		tbp.add(new HTML("TBD"), "Rules");
+		RulesViewer rules = new RulesViewer();
+		tbp.add(rules, "Rules");
 		
 		final SerialMonitor mon = new SerialMonitor();
 		addSectionChangeHandler(mon);
