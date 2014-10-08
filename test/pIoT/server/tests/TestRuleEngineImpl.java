@@ -2,9 +2,6 @@ package pIoT.server.tests;
 
 import static org.junit.Assert.*;
 
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -19,11 +16,7 @@ import pIoT.server.DBServiceImpl;
 import pIoT.server.RulesServiceImpl;
 import pIoT.server.rules.PreParser.PreParsed;
 import pIoT.server.rules.PreParser.PreParsed.Constraint;
-import pIoT.shared.CompileRuleException;
-import pIoT.shared.DataBaseException;
-import pIoT.shared.DuplicateRuleException;
 import pIoT.shared.Node;
-import pIoT.shared.ParseRuleException;
 import pIoT.shared.Rule;
 import pIoT.shared.messages.DataMessage;
 import pIoT.shared.notifications.Notification;
@@ -142,10 +135,69 @@ public class TestRuleEngineImpl {
 
 		ArrayList<Notification> nots;
 
-		re.reason();
+		re.reason(null);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(0, nots.size());
+	}
+	
+	@Test
+	public void testNoDataLast() throws Exception{
+		//store rule
+		Rule sr = new Rule("simpleRule",
+				"?lastMessage.sourceMessage == 'message9'", 
+				"SENDNOTIFICATION",
+				"test",
+				1, "myrules", null);
+		db.store(sr);
+
+		RulesServiceImpl re = new RulesServiceImpl();
+
+		ArrayList<Notification> nots;
+
+		re.reason(null);
+
+		nots = db.getUnfixedNotifications();
+		assertEquals(0, nots.size());
+	}
+	
+	@Test
+	public void testSimpleRuleLast() throws Exception{
+		//store rule
+		Rule sr = new Rule("simpleRule",
+				"lastMessage.sourceMessage == 'message9'", 
+				"SENDNOTIFICATION",
+				"test",
+				1, "myrules", null);
+		db.store(sr);
+
+		RulesServiceImpl re = new RulesServiceImpl();
+
+		ArrayList<Notification> nots;
+
+		//store 10 messages
+		Date now = Calendar.getInstance().getTime();
+		Node dev1 = new Node(1, "dev1", "home");
+		DBServiceImpl.store(dev1);
+		for(int i=0; i<9; i++){
+			Date msgDate = new Date(now.getTime() + i*100);
+			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
+			DBServiceImpl.store(mess);
+
+			re.reason(mess);
+			nots = db.getUnfixedNotifications();
+			assertEquals(0, nots.size());
+		}
+
+		Date msgDate = new Date(now.getTime() + 900);
+		DataMessage mess = new DataMessage(msgDate, "message9", 1);
+		DBServiceImpl.store(mess);
+
+		re.reason(mess);
+
+		nots = db.getUnfixedNotifications();
+		assertEquals(1, nots.size());
+		assertEquals("test", nots.get(0).getMessage());
 	}
 
 	@Test
@@ -171,7 +223,7 @@ public class TestRuleEngineImpl {
 			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
 			DBServiceImpl.store(mess);
 
-			re.reason();
+			re.reason(mess);
 			nots = db.getUnfixedNotifications();
 			assertEquals(0, nots.size());
 		}
@@ -180,7 +232,7 @@ public class TestRuleEngineImpl {
 		DataMessage mess = new DataMessage(msgDate, "message9", 1);
 		DBServiceImpl.store(mess);
 
-		re.reason();
+		re.reason(mess);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -216,7 +268,7 @@ public class TestRuleEngineImpl {
 		DataMessage mess = new DataMessage(msgDate, "message1", 1);
 		db.getDB().store(mess);
 
-		re.reason();
+		re.reason(mess);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -227,7 +279,7 @@ public class TestRuleEngineImpl {
 		mess = new DataMessage(msgDate, "message2", 1);
 		db.getDB().store(mess);
 
-		re.reason();
+		re.reason(mess);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -262,7 +314,7 @@ public class TestRuleEngineImpl {
 		DataMessage mess = new DataMessage(msgDate, "message1", 1);
 		db.getDB().store(mess);
 
-		re.reason();
+		re.reason(mess);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -275,7 +327,7 @@ public class TestRuleEngineImpl {
 		mess = new DataMessage(msgDate, "message2", 1);
 		db.getDB().store(ed);
 
-		re.reason();
+		re.reason(mess);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -305,7 +357,7 @@ public class TestRuleEngineImpl {
 				null, null);
 		db.getDB().store(ed);
 
-		re.reason();
+		re.reason(ed);
 
 		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
@@ -350,7 +402,7 @@ public class TestRuleEngineImpl {
 		ExtendedDataMessage ed = new ExtendedDataMessage(now, "src mess", 1, "xxx", null, null);
 		db.getDB().store(ed);
 		
-		re.reason();
+		re.reason(ed);
 
 		ArrayList<Notification> nots =db.getUnfixedNotifications();
 		assertEquals(0, nots.size());
@@ -358,7 +410,7 @@ public class TestRuleEngineImpl {
 		ed = new ExtendedDataMessage(new Date(now.getTime()+1000), "message", 1, "message", null, null);
 		db.getDB().store(ed);
 		
-		re.reason();
+		re.reason(ed);
 
 		nots =db.getUnfixedNotifications();
 		assertEquals(0, nots.size());
@@ -366,9 +418,44 @@ public class TestRuleEngineImpl {
 		ed = new ExtendedDataMessage(new Date(now.getTime()+2000), "message", 5, "message", null, null);
 		db.getDB().store(ed);
 		
-		re.reason();
+		re.reason(ed);
 
 		nots =db.getUnfixedNotifications();
+		assertEquals(1, nots.size());
+	}
+	
+	@Test
+	public void testTypeLast() throws Exception{
+		//store rule
+		Rule sr = new Rule("rule",
+				"(lastMessage instanceof pIoT.client.tests.ExtendedDataMessage) "+
+				"&& lastMessage.extendedMessage == 'message'", 
+						"SENDNOTIFICATION",
+						"testRule",
+						1, "myrules", null);
+		db.store(sr);
+
+		RulesServiceImpl re = new RulesServiceImpl();
+
+		ArrayList<Notification> nots;
+
+		Date now = Calendar.getInstance().getTime();
+		Node dev1 = new Node(1, "dev1", "home");
+		db.getDB().store(dev1);
+		
+		DataMessage mess = new DataMessage(now, "message", 1);
+		db.getDB().store(mess);
+		
+		re.reason(mess);
+		nots = db.getUnfixedNotifications();
+		assertEquals(0, nots.size());
+		
+		ExtendedDataMessage ed = new ExtendedDataMessage(new Date(now.getTime() + 100), "src", 1, "message",
+				null, null);
+		db.getDB().store(ed);
+
+		re.reason(ed);
+		nots = db.getUnfixedNotifications();
 		assertEquals(1, nots.size());
 	}
 }

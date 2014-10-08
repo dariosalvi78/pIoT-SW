@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import pIoT.shared.Rule;
+import pIoT.shared.messages.DataMessage;
 
 /**
  * The async counterpart of {@link RulesService}
@@ -35,5 +36,5 @@ public interface RulesServiceAsync {
 	
 	public void removeRule(Rule rule, AsyncCallback<Void> callback);
 	
-	public void reason(AsyncCallback<Void> callback);
+	public void reason(DataMessage m, AsyncCallback<Void> callback);
 }

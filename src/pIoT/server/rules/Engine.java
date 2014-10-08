@@ -165,7 +165,7 @@ public class Engine {
 
 		Map<String, AbstractAction> actionsMap = validateActions(actions);
 		Rule bestrule = getBestOutcome(nameSpacePattern, rulesNames, input);
-		actionsMap.get(bestrule.getOutcome()).execute(bestrule.getParameters());
+		actionsMap.get(bestrule.getOutcome()).execute(input.values(), bestrule.getParameters());
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class Engine {
 				//only run, if not already run!
 				if(!executedOutcomes.contains(r.getOutcome())){
 
-					actionsMap.get(r.getOutcome()).execute(r.getParameters());
+					actionsMap.get(r.getOutcome()).execute(input.values(), r.getParameters());
 
 					executedOutcomes.add(r.getOutcome());
 				}

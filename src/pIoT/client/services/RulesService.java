@@ -21,6 +21,7 @@ import pIoT.shared.DataBaseException;
 import pIoT.shared.DuplicateRuleException;
 import pIoT.shared.ParseRuleException;
 import pIoT.shared.Rule;
+import pIoT.shared.messages.DataMessage;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -40,5 +41,5 @@ public interface RulesService extends RemoteService {
 	
 	public void removeRule(Rule rule);
 	
-	public void reason() throws DuplicateRuleException;
+	public void reason(DataMessage m) throws DataBaseException, DuplicateRuleException;
 }

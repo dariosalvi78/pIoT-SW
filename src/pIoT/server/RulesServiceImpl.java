@@ -18,19 +18,16 @@ import static pIoT.server.QueryUtils.limit;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.db4o.ObjectSet;
-import com.db4o.query.Candidate;
-import com.db4o.query.Evaluation;
 import com.db4o.query.Predicate;
-import com.db4o.query.Query;
 import com.db4o.query.QueryComparator;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -61,10 +58,13 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 
 	private static final Logger log = Logger.getLogger(RulesServiceImpl.class.getName());
 
+	public static final String lastMessageVarName = "lastMessage";
+
 	private Engine engine;
 	private ArrayList<AbstractAction> actions = new ArrayList<>();;
 	private TreeMap<String, PreParsed> variables = new TreeMap<>();
 	private HashMap<String, Rule> rulesVars = new HashMap<>();
+	private ArrayList<Rule> otherRules = new ArrayList<Rule>();
 	private int variableCounter;
 
 	private static ArrayList<Class<?>> supportedClasses = new ArrayList<>();
@@ -74,7 +74,17 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		actions.add(new AbstractAction("SENDNOTIFICATION") {
 
 			@Override
-			public void execute(String parameters) {
+			public void execute(Collection<Object>input, String parameters) {
+				//substitute know words
+				//$SOURCENODE
+				if(parameters.contains("$SOURCEADDRESS")){
+					if((input != null) && (input.size() >0)){
+						//get first input
+						int srcaddr = ((DataMessage) input.iterator().next()).getSourceAddress();
+						//substitute in params
+						parameters = parameters.replace("$SOURCEADDRESS", ""+srcaddr);
+					}
+				}
 				Notification not = new Notification(parameters, Calendar.getInstance().getTime(), false);
 				ActionsServiceImpl.storeNotification(not);
 			}
@@ -86,6 +96,7 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		addSupportedClass(SwitchState.class);
 		addSupportedClass(SwitchSet.class);
 		addSupportedClass(LightState.class);
+
 
 		//load static rules
 		new StaticRules();
@@ -104,10 +115,49 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		SerialServiceImpl.addDataHandler(new DataHandler() {
 			@Override
 			public void handle(DataMessage m) throws Exception {
-				reason();
+				reason(m);
 			}
 		});
 		log.info("Rules engine started");
+	}
+
+	@Override
+	public void reason(DataMessage m) throws DuplicateRuleException {
+		//fill an holder of variables - data
+		TreeMap<String, ArrayList<Object>> data = new TreeMap<>();
+		for(String var : variables.keySet()){
+			ArrayList<Object> ds = queryPreparsed(variables.get(var));
+			data.put(var, ds);
+		}
+
+		//generate permutations
+		ArrayList<TreeMap<String, Object>> permutations = new ArrayList<>();
+		TreeMap<String, Object> curr = new TreeMap<>();
+		generatePermutations(data, 0, curr, permutations);
+
+		//execute all possible permutations
+		for(TreeMap<String, Object> dd : permutations){
+			ArrayList<String> rules = new ArrayList<>();
+			//The engine doesn't like TreeMaps
+			HashMap<String, Object> ddd = new HashMap<>();
+			for(String s : dd.keySet()){
+				if(dd.get(s) != null){
+					rules.add(rulesVars.get(s).getFullyQualifiedName());
+					ddd.put(s, dd.get(s));
+				}
+			}
+			ddd.put(lastMessageVarName, m);
+			log.fine("Executing rules with input permutation: " + ddd);
+			engine.executeAllActions(null, rules, ddd, actions);
+		}
+		ArrayList<String> rules = new ArrayList<>();
+		for(Rule r: otherRules){
+			rules.add(r.getFullyQualifiedName());
+		}
+		HashMap<String, Object> ddd = new HashMap<>();
+		ddd.put(lastMessageVarName, m);
+		log.fine("Executing rules with last message "+m);
+		engine.executeAllActions(null, rules, ddd, actions);
 	}
 
 	public static void addSupportedClass(Class<?> clazz){
@@ -144,6 +194,9 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 			variables.put(variableName, p);
 			variableCounter++;
 		}
+		if(preps.isEmpty())
+			otherRules.add(rule);
+
 		engine.addRule(rule);
 	}
 
@@ -241,51 +294,51 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 						if(v instanceof Integer){
 							int v1 = (int) v;
 							int v2 = Integer.parseInt(c.value);
-							if(c.operator =="<")
+							if(c.operator.equals("<"))
 								retv = retv && (v1 < v2);
-							if(c.operator ==">")
+							if(c.operator.equals(">"))
 								retv = retv && (v1 > v2);
-							if((c.operator =="=") || (c.operator =="=="))
+							if((c.operator.equals("=")) || (c.operator.equals("==")))
 								retv = retv && (v1 == v2);
-							if(c.operator ==">=")
+							if(c.operator.equals(">="))
 								retv = retv && (v1 >= v2);
-							if(c.operator =="<=")
+							if(c.operator.equals("<="))
 								retv = retv && (v1 <= v2);
 						}
 						if(v instanceof Float){
 							float v1 = (float) v;
 							float v2 = Float.parseFloat(c.value);
-							if(c.operator =="<")
+							if(c.operator.equals("<"))
 								retv = retv && (v1 < v2);
-							if(c.operator ==">")
+							if(c.operator.equals(">"))
 								retv = retv && (v1 > v2);
-							if((c.operator =="=") || (c.operator =="=="))
+							if((c.operator.equals("=")) || (c.operator.equals("==")))
 								retv = retv && (v1 == v2);
-							if(c.operator ==">=")
+							if(c.operator.equals(">="))
 								retv = retv && (v1 >= v2);
-							if(c.operator =="<=")
+							if(c.operator.equals("<="))
 								retv = retv && (v1 <= v2);
 						}
 						if(v instanceof Double){
 							double v1 = (double) v;
 							double v2 = Double.parseDouble(c.value);
-							if(c.operator =="<")
+							if(c.operator.equals("<"))
 								retv = retv && (v1 < v2);
-							if(c.operator ==">")
+							if(c.operator.equals(">"))
 								retv = retv && (v1 > v2);
-							if((c.operator =="=") || (c.operator =="=="))
+							if((c.operator.equals("=")) || (c.operator.equals("==")))
 								retv = retv && (v1 == v2);
-							if(c.operator ==">=")
+							if(c.operator.equals(">="))
 								retv = retv && (v1 >= v2);
-							if(c.operator =="<=")
+							if(c.operator.equals("<="))
 								retv = retv && (v1 <= v2);
 						}
 						if(v instanceof String){
 							String v1 = (String) v;
 							String[] vv = c.value.split("'");
 							String v2 = vv[1];
-							if((c.operator =="=") || (c.operator =="=="))
-								retv = retv && (v1 == v2);
+							if((c.operator.equals("=")) || (c.operator.equals("==")))
+								retv = retv && (v1.equals(v2));
 						}
 						//TODO: hyerarchical descend
 					}
@@ -321,33 +374,6 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 	}
 
 
-	public void reason() throws  DuplicateRuleException{
-		//fill an holder of variables - data
-		TreeMap<String, ArrayList<Object>> data = new TreeMap<>();
-		for(String var : variables.keySet()){
-			ArrayList<Object> ds = queryPreparsed(variables.get(var));
-			data.put(var, ds);
-		}
 
-		//generate permutations
-		ArrayList<TreeMap<String, Object>> permutations = new ArrayList<>();
-		TreeMap<String, Object> curr = new TreeMap<>();
-		generatePermutations(data, 0, curr, permutations);
-
-		//execute all possible permutations
-		for(TreeMap<String, Object> dd : permutations){
-			ArrayList<String> rules = new ArrayList<>();
-			//The engine doesn't like TreeMaps
-			HashMap<String, Object> ddd = new HashMap<>();
-			for(String s : dd.keySet()){
-				if(dd.get(s) != null){
-					rules.add(rulesVars.get(s).getFullyQualifiedName());
-					ddd.put(s, dd.get(s));
-				}
-			}
-			log.fine("Executing rules with input permutation: "+ddd);
-			engine.executeAllActions(null, rules, ddd, actions);
-		}
-	}
 
 }

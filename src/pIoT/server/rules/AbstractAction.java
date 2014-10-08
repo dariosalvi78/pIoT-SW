@@ -11,6 +11,8 @@
  */
 package pIoT.server.rules;
 
+import java.util.Collection;
+
 /**
  * This is an abstract Action.
  * Its implementation simply provides a mechanism for naming the object, 
@@ -63,8 +65,9 @@ public abstract class AbstractAction  {
 	
 	/**
 	 * The function to be implemented by the action.
+	 * @param input the data that triggered the action
 	 * @param parameters parameters, in form of String
 	 */
-	public abstract void execute(String parameters);
+	public abstract void execute(Collection<Object> input, String parameters);
 	
 }
