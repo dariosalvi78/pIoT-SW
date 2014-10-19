@@ -81,7 +81,7 @@ public class Rule implements Comparable<Rule>, Serializable, Reflectable {
     private String description;
     
     public Rule(){
-    	
+    	//zero arguments constructor
     }
     
     public Rule(final String name, final String expression, final String outcome, final String parameters,

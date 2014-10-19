@@ -165,7 +165,7 @@ public class ObjectParser {
 	}
 	
 	public static void reset(){
-		logger.info("Resetting serial buffer");
+		logger.fine("Resetting serial buffer");
 		stringBuffer = "";
 	}
 }

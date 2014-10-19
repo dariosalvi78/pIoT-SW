@@ -52,13 +52,22 @@ public class TestRuleEngine {
 		assertEquals("testout", eng.getBestOutcome(null, null, data).getOutcome());
 
 		eng.removeRule(r);
+		
+		mess = new DataMessage(Calendar.getInstance().getTime(),
+				"message", 2);
+		data = new HashMap<>();
+		data.put("input0", mess);
+		assertNull(	eng.getBestOutcome(null, null, data));
+		
+		eng = new Engine();
+		
 		mess = new DataMessage(Calendar.getInstance().getTime(),
 				"message", 2);
 		data = new HashMap<>();
 		data.put("input0", mess);
 		assertNull(	eng.getBestOutcome(null, null, data));
 	}
-
+	
 	@Test
 	public void testSimpleRule2() throws Exception {
 		Engine eng = new Engine();

@@ -32,7 +32,9 @@ public interface RulesServiceAsync {
 	
 	public void getActionNames(AsyncCallback<ArrayList<String>> callback);
 	
-	public void saveRule(Rule rule, AsyncCallback<Void> callback);
+	public void addRule(Rule rule, AsyncCallback<Void> callback);
+	
+	public void updateRule(String oldRuleName, Rule rule, AsyncCallback<Void> callback);
 	
 	public void removeRule(Rule rule, AsyncCallback<Void> callback);
 	

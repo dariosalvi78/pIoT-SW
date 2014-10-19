@@ -47,7 +47,7 @@ public class RulesViewer  extends Composite{
 		addbutton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				mainPanel.add(renderRule(new Rule()));
+				mainPanel.add(renderRule(null));
 			}
 		});
 		mainPanel.add(addbutton);
@@ -60,7 +60,7 @@ public class RulesViewer  extends Composite{
 					@Override
 					public void onSuccess(ArrayList<Rule> result) {
 						for(Rule r: result){
-							renderRule(r);
+							mainPanel.add(renderRule(r));
 						}
 					}
 					@Override
@@ -91,21 +91,21 @@ public class RulesViewer  extends Composite{
 		Label nameL = new Label("Name");
 		layout.add(nameL);
 		final TextBox nameT = new TextBox();
-		nameT.setText(r.getName());
+		nameT.setText(r==null? "": r.getName());
 		nameT.setWidth("400px");
 		layout.add(nameT);
 		
 		Label groupL = new Label("Group");
 		layout.add(groupL);
 		final TextBox groupT = new TextBox();
-		groupT.setText(r.getNamespace());
+		groupT.setText(r==null? "": r.getNamespace());
 		groupT.setWidth("400px");
 		layout.add(groupT);
 		
 		Label descrL = new Label("Description");
 		layout.add(descrL);
 		final TextArea descrT = new TextArea();
-		descrT.setText(r.getDescription());
+		descrT.setText(r==null? "": r.getDescription());
 		descrT.setWidth("400px");
 		descrT.setHeight("80px");
 		layout.add(descrT);
@@ -113,7 +113,7 @@ public class RulesViewer  extends Composite{
 		Label exprL = new Label("Expression");
 		layout.add(exprL);
 		final TextArea exprT = new TextArea();
-		exprT.setText(r.getExpression());
+		exprT.setText(r==null? "": r.getExpression());
 		exprT.setTitle("MVEL Expression Editor");
 		exprT.setWidth("400px");
 		exprT.setHeight("100px");
@@ -130,14 +130,14 @@ public class RulesViewer  extends Composite{
 		Label paramsL = new Label("Parameters");
 		layout.add(paramsL);
 		final TextBox paramsT = new TextBox();
-		paramsT.setText(r.getParameters());
+		paramsT.setText(r==null? "": r.getParameters());
 		paramsT.setWidth("400px");
 		layout.add(paramsT);
 		
 		Label priorityL = new Label("Priority");
 		layout.add(priorityL);
 		final TextBox priorityT = new TextBox();//TODO: numeric
-		priorityT.setText(""+ r.getPriority());
+		priorityT.setText(""+ (r==null? "": r.getPriority()));
 		priorityT.setWidth("30px");
 		priorityT.setMaxLength(2);
 		layout.add(priorityT);
@@ -153,17 +153,30 @@ public class RulesViewer  extends Composite{
 						paramsT.getText(),
 						Integer.parseInt(priorityT.getText()),
 						groupT.getText(), descrT.getText());
-				
-				rules.saveRule(newrule, new AsyncCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						Window.alert("Rule saved");
-					}
-					@Override
-					public void onFailure(Throwable caught) {
-						Window.alert("Cannot save rule.\n"+caught.getMessage());
-					}
-				});
+				if(r == null){
+					rules.addRule(newrule, new AsyncCallback<Void>() {
+						@Override
+						public void onSuccess(Void result) {
+							Window.alert("Rule saved");
+						}
+						@Override
+						public void onFailure(Throwable caught) {
+							Window.alert("Cannot save rule.\n"+caught.getMessage());
+						}
+					});
+				}else{
+					rules.updateRule(r.getFullyQualifiedName(), newrule, new AsyncCallback<Void>() {
+						@Override
+						public void onSuccess(Void result) {
+							Window.alert("Rule saved");
+						}
+						@Override
+						public void onFailure(Throwable caught) {
+							Window.alert("Cannot save rule.\n"+caught.getMessage());
+						}
+					});
+					
+				}
 			}
 		});
 		bottomLayout.add(saveB);

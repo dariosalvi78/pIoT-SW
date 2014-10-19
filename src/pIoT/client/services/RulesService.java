@@ -37,7 +37,9 @@ public interface RulesService extends RemoteService {
 	
 	public ArrayList<String> getActionNames();
 	
-	public void saveRule(Rule rule) throws DataBaseException, DuplicateRuleException, CompileRuleException, ParseRuleException;
+	public void addRule(Rule rule) throws DataBaseException, DuplicateRuleException, CompileRuleException, ParseRuleException;
+	
+	public void updateRule(String oldRuleName, Rule rule) throws DataBaseException, DuplicateRuleException, CompileRuleException, ParseRuleException;
 	
 	public void removeRule(Rule rule);
 	

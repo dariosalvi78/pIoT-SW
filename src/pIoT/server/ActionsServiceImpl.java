@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import jssc.SerialPortException;
 
 import com.db4o.ObjectSet;
+import com.db4o.query.Query;
 import com.google.gson.Gson;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -53,13 +54,16 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 	}
 
 	public static void storeNotification(Notification not){
-		logger.info("Storing notification: "+not.getMessage());
 		//Construct an example by removing the timestamp
-		Date originaldate = not.getCreated();
-		not.setCreated(null);
-		if(DBServiceImpl.getDB().queryByExample(not).size() ==0){
+
+		Query q = DBServiceImpl.getDB().query();
+		q.constrain(Notification.class);
+		q.descend("message").constrain(not.getMessage());
+		q.descend("fixed").constrain(false);
+		
+		if(q.execute().size() ==0){
 			//No similar notification, then set the timestamp back and save
-			not.setCreated(originaldate);
+			logger.info("Storing notification: "+not.getMessage());
 			DBServiceImpl.getDB().store(not);
 		} else {
 			logger.warning("Trying to store a notification that already exists");

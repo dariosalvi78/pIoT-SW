@@ -238,6 +238,45 @@ public class TestRuleEngineImpl {
 		assertEquals(1, nots.size());
 		assertEquals("test", nots.get(0).getMessage());
 	}
+	
+	@Test
+	public void testUpdate() throws Exception{
+		RulesServiceImpl re = new RulesServiceImpl();
+		
+		Rule sr = new Rule("simpleRule",
+				"DataMessage(limit = last).sourceMessage == 'message1'", 
+				"SENDNOTIFICATION",
+				"test",
+				1, "myrules", null);
+		re.addRule(sr);
+		
+		assertEquals(1, re.getRules().size());
+		assertEquals("myrules.simpleRule", re.getRules().get(0).getFullyQualifiedName());
+		
+		sr = new Rule("simpleRule",
+				"DataMessage(limit = first).sourceMessage == 'message2'", 
+				"SENDNOTIFICATION",
+				"test",
+				1, "myrules", null);
+		
+		re.updateRule("myrules.simpleRule",sr);
+		
+		assertEquals(1, re.getRules().size());
+		assertEquals("DataMessage(limit = first).sourceMessage == 'message2'", re.getRules().get(0).getExpression());
+		assertEquals("myrules.simpleRule", re.getRules().get(0).getFullyQualifiedName());
+		
+		sr = new Rule("anotherRule",
+				"DataMessage(limit = first).sourceMessage == 'message3'", 
+				"SENDNOTIFICATION",
+				"test",
+				1, "otherrules", null);
+		
+		re.updateRule("myrules.simpleRule", sr);
+		
+		assertEquals(1, re.getRules().size());
+		assertEquals("DataMessage(limit = first).sourceMessage == 'message3'", re.getRules().get(0).getExpression());
+		assertEquals("otherrules.anotherRule", re.getRules().get(0).getFullyQualifiedName());
+	}
 
 	@Test
 	public void testTwoSimpleRules() throws Exception{
@@ -373,7 +412,7 @@ public class TestRuleEngineImpl {
 						"SENDNOTIFICATION",
 						"testRule",
 						1, "myrules", null);
-		re.saveRule(sr);
+		re.addRule(sr);
 
 		assertEquals(sr.getFullyQualifiedName(), re.getRules().get(0).getFullyQualifiedName());
 
@@ -392,7 +431,7 @@ public class TestRuleEngineImpl {
 				"testRule",
 				1, "myrules", null);
 
-		re.saveRule(r);
+		re.addRule(r);
 
 
 		Date now = Calendar.getInstance().getTime();
