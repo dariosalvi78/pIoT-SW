@@ -97,7 +97,6 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		addSupportedClass(SwitchSet.class);
 		addSupportedClass(LightState.class);
 
-
 		//load static rules
 		new StaticRules();
 
@@ -165,7 +164,10 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 	}
 
 	public ArrayList<Rule> getRules() {
-		return new ArrayList<Rule>(rulesVars.values());
+		ArrayList<Rule> rules = new ArrayList<Rule>();
+		rules.addAll(rulesVars.values());
+		rules.addAll(otherRules);
+		return rules;
 	}
 
 	public ArrayList<String> getActionNames() {
@@ -175,13 +177,29 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		return retv;
 	}
 
-	public void saveRule(Rule rule) throws DataBaseException, DuplicateRuleException, CompileRuleException, ParseRuleException{
-		removeRule(rule);
+	@Override
+	public void addRule(Rule rule) throws DataBaseException,
+			DuplicateRuleException, CompileRuleException, ParseRuleException {
+		String expr = rule.getExpression();
 		parseRule(rule);
+		
+		rule.setExpression(expr);
 		DBServiceImpl.getDB().store(rule);
 		DBServiceImpl.getDB().commit();
-		log.info("Rule "+rule.getName()+" saved.");
+		log.info("Rule "+rule.getName()+" added.");
 	}
+
+	@Override
+	public void updateRule(String oldRuleName, Rule rule)
+			throws DataBaseException, DuplicateRuleException,
+			CompileRuleException, ParseRuleException {
+		Rule remr = new Rule();
+		remr.setNamespace(oldRuleName.substring(0, oldRuleName.lastIndexOf(".")));
+		remr.setName(oldRuleName.substring(oldRuleName.lastIndexOf(".")+1));
+		removeRule(remr);
+		addRule(rule);
+	}
+
 
 	private void parseRule(Rule rule) throws CompileRuleException, DuplicateRuleException, ParseRuleException{
 		//preparse rule
@@ -211,7 +229,10 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		}
 		engine.removeRule(rule);
 
-		ObjectSet<Rule> os = DBServiceImpl.getDB().queryByExample(rule);
+		Rule exrule = new Rule();
+		exrule.setName(rule.getName());
+		exrule.setNamespace(rule.getNamespace());
+		ObjectSet<Rule> os = DBServiceImpl.getDB().queryByExample(exrule);
 		for(Rule r : os){
 			DBServiceImpl.getDB().delete(r);
 			DBServiceImpl.getDB().commit();
@@ -372,8 +393,5 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		}
 		return data;
 	}
-
-
-
 
 }
