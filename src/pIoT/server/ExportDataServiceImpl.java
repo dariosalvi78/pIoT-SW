@@ -14,6 +14,8 @@
  */
 package pIoT.server;
 
+import static pIoT.server.QueryUtils.limit;
+
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -32,7 +34,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.db4o.ObjectSet;
+import com.db4o.query.Query;
+
 import pIoT.shared.DataBaseException;
+import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
 
 
@@ -103,7 +109,7 @@ public class ExportDataServiceImpl extends HttpServlet {
 			propsStr+= (properties[i] + (i<properties.length-1? ".": ""));
 		logger.finer("Querying data for exporting, class: "+classname+" properties: "+propsStr);
 		Class<?> cl = Class.forName(classname);
-		ArrayList<?> data = DBServiceImpl.getDataMessages(cl, devicename, -1, -1);
+		ArrayList<?> data = getDataMessages(cl, devicename, -1, -1);
 
 		PrintStream stream = new PrintStream(out);
 		stream.println("timestamp,nodeaddress,"+properties[properties.length-1]);
@@ -112,7 +118,7 @@ public class ExportDataServiceImpl extends HttpServlet {
 			Object o = data.get(i);
 			long ts = ((DataMessage) o).getReceivedTimestamp().getTime();
 			int node = ((DataMessage) o).getSourceAddress();
-			Object val = ExportDataServiceImpl.getPropertyValue(cl, propsStr, o);
+			Object val = ExportDataServiceImpl.getPropertyValue(propsStr, o);
 			String value = val.toString();
 			stream.println(ts+ ","+node+","+ value);
 		}
@@ -133,9 +139,8 @@ public class ExportDataServiceImpl extends HttpServlet {
 	 * @throws IllegalArgumentException 
 	 * @throws IllegalAccessException 
 	 */
-	public static Object getPropertyValue(Class<?> clazz, String propertyName, Object instance) throws IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		if (clazz == null)
-			throw new IllegalArgumentException("Clazz must not be null.");
+	public static Object getPropertyValue(String propertyName, Object instance) throws IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Class<?> clazz = instance.getClass();
 		if (propertyName == null)
 			throw new IllegalArgumentException("PropertyName must not be null.");
 		if (instance == null)
@@ -155,5 +160,39 @@ public class ExportDataServiceImpl extends HttpServlet {
 				}
 		}
 		return null;
+	}
+	
+	private <T> ArrayList<T> getDataMessages(final Class<T> T, final String deviceName, final int limitstart, final int limitend)
+			throws DataBaseException, IllegalArgumentException {
+		int devAddress = 0;
+		if(deviceName != null){
+			//Get the source address of the device
+			Query query = DBServiceImpl.getDB().query();
+			query.constrain(Node.class);
+			query.descend("name").constrain(deviceName);
+
+			ObjectSet<Node> devicesset = query.execute();
+			if(devicesset.isEmpty())
+				throw new IllegalArgumentException("The name provided for the device "+deviceName+" does not exist");
+
+			//Get the first element (only one should exist)
+			Node device = devicesset.next();
+			devAddress = device.getAddress();
+		}
+		ArrayList<T> retval = new ArrayList<T>();
+
+		//Query for the messages
+		Query query= DBServiceImpl.getDB().query();
+		query.constrain(T);
+		query.descend("receivedTimestamp").orderDescending();
+		if(deviceName != null){
+			query.descend("sourceAddress").constrain(devAddress);
+		}
+
+		ObjectSet<T> messagesset = query.execute();
+		for (final T mess: limit(messagesset, limitstart, limitend)) {
+			retval.add(mess);
+		}
+		return retval;
 	}
 }

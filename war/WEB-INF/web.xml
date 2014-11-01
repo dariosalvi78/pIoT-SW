@@ -62,6 +62,16 @@
 		<url-pattern>/pIoTServer/rules</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>ChartServlet</servlet-name>
+		<servlet-class>pIoT.server.ChartServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ChartServlet</servlet-name>
+		<url-pattern>/pIoTServer/charts</url-pattern>
+	</servlet-mapping>
+
+
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>pIoTServer.html</welcome-file>

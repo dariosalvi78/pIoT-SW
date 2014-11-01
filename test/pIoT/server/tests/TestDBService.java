@@ -64,7 +64,7 @@ public class TestDBService {
 			DataMessage mess = new DataMessage(msgDate, "message"+i, 1);
 			DBServiceImpl.store(mess);
 		}
-		
+
 		//retrieve them
 		ArrayList<DataMessage> messages = db.getDataMessages(DataMessage.class.getName(), "dev1", -1, -1);
 		assertEquals(10, messages.size());
@@ -129,16 +129,16 @@ public class TestDBService {
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
 		DBServiceImpl.getDB().store(dev);
-		
+
 		DataMessage mesg1 = new DataMessage(now, "message1", 1);
 		DBServiceImpl.getDB().store(mesg1);
-		
+
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
 		DBServiceImpl.getDB().store(mesg2);
-		
+
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null, null);
 		DBServiceImpl.getDB().store(mesg3);
-		
+
 		int dms = db.getClassStoredCount(DataMessage.class.getName(), null);
 		assertEquals(3, dms);
 		dms = db.getClassStoredCount(DataMessage.class.getName(), "dev");
@@ -146,7 +146,7 @@ public class TestDBService {
 		int edms = db.getClassStoredCount(ExtendedDataMessage.class.getName(), null);
 		assertEquals(1, edms);
 	}
-	
+
 	@Test
 	public void testgetDataMessageClassNames(){
 		Date now = Calendar.getInstance().getTime();
@@ -156,29 +156,29 @@ public class TestDBService {
 		DBServiceImpl.getDB().store(mesg1);
 		DataMessage mesg2 = new DataMessage(now, "message2", 1);
 		DBServiceImpl.getDB().store(mesg2);
-		
+
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", null, null);
 		DBServiceImpl.getDB().store(mesg3);
-		
+
 		List<String> datanames = db.getDataMessageClassNames();
 		assertEquals(2, datanames.size());
 		assertTrue(datanames.get(0).equals(ExtendedDataMessage.class.getName()) || 
 				datanames.get(0).equals(DataMessage.class.getName()));
 
 	}
-	
+
 	@Test
 	public void testExtendedData() throws Exception {
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
 		DBServiceImpl.getDB().store(dev);
-		
+
 		ExtendedData data = new ExtendedData();
 		data.setABool(true);
 		data.setAnArray(new int[]{1,2,3,4});
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data, null);
 		DBServiceImpl.getDB().store(mesg3);
-		
+
 		List<DataMessage> messageses = db.getDataMessages(ExtendedDataMessage.class.getName(), "dev", -1, -1);
 		assertEquals(1, messageses.size());
 		ExtendedDataMessage ver = (ExtendedDataMessage) messageses.get(0);
@@ -188,49 +188,49 @@ public class TestDBService {
 			assertEquals(mesg3.getData().getAnArray()[i], ver.getData().getAnArray()[i]);
 		}
 	}
-	
+
 	@Test
 	public void testNestedData() throws Exception {
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
 		DBServiceImpl.getDB().store(dev);
-		
+
 		NestedData nested = new NestedData();
 		nested.setNest("neststring");
 		ExtendedDataMessage mesg = new ExtendedDataMessage(now, "message3", 1, "extended message", null, nested);
 		DBServiceImpl.getDB().store(mesg);
-		
+
 		List<DataMessage> messageses = db.getDataMessages(ExtendedDataMessage.class.getName(), "dev", -1, -1);
 		assertEquals(1, messageses.size());
 		ExtendedDataMessage ver = (ExtendedDataMessage) messageses.get(0);
 		assertEquals(mesg.getNested().getNest(), ver.getNested().getNest());
 	}
 
-	
+
 	@Test
 	public void testDeleteNode() throws DataBaseException{
 		Date now = Calendar.getInstance().getTime();
 		Node dev = new Node(1, "dev", "home");
 		DBServiceImpl.getDB().store(dev);
-		
+
 		ExtendedData data = new ExtendedData();
 		data.setABool(true);
 		data.setAnArray(new int[]{1,2,3,4});
 		ExtendedDataMessage mesg3 = new ExtendedDataMessage(now, "message3", 1, "extended message", data, null);
 		DBServiceImpl.getDB().store(mesg3);
-		
+
 		NewDeviceNotification notif = new NewDeviceNotification(now, false, dev);
 		DBServiceImpl.getDB().store(notif);
 		DBServiceImpl.getDB().commit();
-		
+
 		db.deleteDevice(dev);
-		
+
 		Query query= DBServiceImpl.getDB().query();
 		query.constrain(ExtendedData.class);
 		query.descend("sourceAddress").constrain(1);
 		ObjectSet<ExtendedData> messagesset = query.execute();
 		assertEquals(0, messagesset.size());
-		
+
 		query= DBServiceImpl.getDB().query();
 		query.constrain(NewDeviceNotification.class);
 		query.descend("device").descend("address").constrain(1);

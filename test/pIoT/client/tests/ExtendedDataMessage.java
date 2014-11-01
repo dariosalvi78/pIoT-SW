@@ -36,6 +36,9 @@ public class ExtendedDataMessage extends DataMessage {
 		private String nest;
 		public NestedData() {
 		}
+		public NestedData(String n) {
+			nest = n;
+		}
 		public String getNest() {
 			return nest;
 		}

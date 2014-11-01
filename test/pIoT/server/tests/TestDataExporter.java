@@ -29,18 +29,16 @@ import pIoT.shared.Node;
 import pIoT.shared.messages.DataMessage;
 import pIoT.shared.messages.examples.Hello;
 
-import com.db4o.ObjectContainer;
-
 public class TestDataExporter {
 
-	private static ObjectContainer db;
+	private static DBServiceImpl db;
 	private final String dbFileName = "testDB";
 
 	@Before
 	public void setUp() throws Exception {
 		DBServiceImpl.dbFileName = dbFileName;
 		
-		db = DBServiceImpl.getDB();
+		db = new DBServiceImpl();
 		
 		Node node = new Node(123, "my node", "home");
 		db.store(node);
@@ -50,7 +48,6 @@ public class TestDataExporter {
 		data = new Hello(Calendar.getInstance().getTime(), 
 				"{\"just an example\"}", 123, 2.99F, 24.3F, 30, 0, 0, 0);
 		db.store(data);
-		db.commit();
 		
 		node = new Node(321, "another node", "bath");
 		db.store(node);
@@ -60,7 +57,6 @@ public class TestDataExporter {
 		data = new Hello(Calendar.getInstance().getTime(), 
 				"{\"just an example\"}", 321, 2.88F, 31.8F, 40, 0, 0, 0);
 		db.store(data);
-		db.commit();
 	}
 
 	@After
@@ -89,7 +85,7 @@ public class TestDataExporter {
 		Class<?> cl = Class.forName(classname);
 		assertEquals(Hello.class.getName(), cl.getName());
 
-		ArrayList<?> data = DBServiceImpl.getDataMessages(cl, null, -1, -1);
+		ArrayList<?> data = db.getDataMessages(classname, null, -1, -1);
 		assertEquals(4, data.size());
 		
 		for(int i=0; i<data.size(); i++){
@@ -99,7 +95,7 @@ public class TestDataExporter {
 			
 			long ts = ((DataMessage) o).getReceivedTimestamp().getTime();
 			int node = ((DataMessage) o).getSourceAddress();
-			Object val = ExportDataServiceImpl.getPropertyValue(cl, propsStr, o);
+			Object val = ExportDataServiceImpl.getPropertyValue(propsStr, o);
 			String value = val.toString();
 			System.out.println(ts+" "+node+" "+value);
 		}
@@ -112,7 +108,7 @@ public class TestDataExporter {
 		Class<?> cl = Class.forName(classname);
 		assertEquals(Hello.class.getName(), cl.getName());
 
-		ArrayList<?> data = DBServiceImpl.getDataMessages(cl, "my node", -1, -1);
+		ArrayList<?> data = db.getDataMessages(classname, "my node", -1, -1);
 		assertEquals(2, data.size());
 		
 		for(int i=0; i<data.size(); i++){
@@ -122,7 +118,7 @@ public class TestDataExporter {
 			
 			long ts = ((DataMessage) o).getReceivedTimestamp().getTime();
 			int node = ((DataMessage) o).getSourceAddress();
-			Object val = ExportDataServiceImpl.getPropertyValue(cl, propsStr, o);
+			Object val = ExportDataServiceImpl.getPropertyValue(propsStr, o);
 			String value = val.toString();
 			System.out.println(ts+" "+node+" "+value);
 		}
@@ -173,11 +169,11 @@ public class TestDataExporter {
 		b2.abean = new MyBean();
 		b2.abean.name = "aa";
 		
-		Object val = ExportDataServiceImpl.getPropertyValue(MySecondBean.class, "anothername", b2);
+		Object val = ExportDataServiceImpl.getPropertyValue("anothername", b2);
 		String value = val.toString();
 		assertEquals("bb", value);
 		
-		val = ExportDataServiceImpl.getPropertyValue(MySecondBean.class, "abean.name", b2);
+		val = ExportDataServiceImpl.getPropertyValue("abean.name", b2);
 		value = val.toString();
 		assertEquals("aa", value);
 	}

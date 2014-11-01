@@ -18,6 +18,8 @@
 	<!-- Other module inherits -->
 	<!-- Client side reflection -->
 	<inherits name='org.dt.reflector.Reflector' />
+	<!-- Google charts -->
+	<inherits name="com.googlecode.gwt.charts.Charts"/> 
 
 	<!-- Date and numbers formatting -->
 	<inherits name="com.google.gwt.i18n.I18N"/>

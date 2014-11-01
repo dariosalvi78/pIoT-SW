@@ -114,39 +114,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		}
 	}
 
-	public static <T> ArrayList<T> getDataMessages(final Class<T> T, final String deviceName, final int limitstart, final int limitend)
-			throws DataBaseException, IllegalArgumentException {
-		int devAddress = 0;
-		if(deviceName != null){
-			//Get the source address of the device
-			Query query = getDB().query();
-			query.constrain(Node.class);
-			query.descend("name").constrain(deviceName);
-
-			ObjectSet<Node> devicesset = query.execute();
-			if(devicesset.isEmpty())
-				throw new IllegalArgumentException("The name provided for the device "+deviceName+" does not exist");
-
-			//Get the first element (only one should exist)
-			Node device = devicesset.next();
-			devAddress = device.getAddress();
-		}
-		ArrayList<T> retval = new ArrayList<T>();
-
-		//Query for the messages
-		Query query= getDB().query();
-		query.constrain(T);
-		query.descend("receivedTimestamp").orderDescending();
-		if(deviceName != null){
-			query.descend("sourceAddress").constrain(devAddress);
-		}
-
-		ObjectSet<T> messagesset = query.execute();
-		for (final T mess: limit(messagesset, limitstart, limitend)) {
-			retval.add(mess);
-		}
-		return retval;
-	}
+	
 
 	@Override
 	public ArrayList<DataMessage> getDataMessages(final String className, final String deviceName, final int limitstart, final int limitend)
@@ -191,7 +159,7 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		}
 		return retval;
 	}
-
+	
 	public void updateDataMessage(Date originalTimestamp, DataMessage newMessage){
 		//Find the message by timestamp
 		Query query = getDB().query();
@@ -326,4 +294,5 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 		rules.addAll(obset);
 		return rules;
 	}
+
 }
