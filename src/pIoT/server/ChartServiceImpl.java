@@ -76,13 +76,14 @@ public class ChartServiceImpl extends RemoteServiceServlet implements ChartServi
 	}
 
 	public static ChartValue getPropertyChartValue(String propertyName, long ts, Object instance) throws  IllegalArgumentException {
+		logger.fine("Getting property "+propertyName+" from "+instance.getClass().getName());
 		Class<?> clazz = instance.getClass();
 		if (propertyName == null)
 			throw new IllegalArgumentException("PropertyName must not be null.");
 
 		final String[] path = propertyName.split("\\.");
 		ChartValue val = null;
-		
+
 		for (int i = 0; i < path.length; i++) {
 			propertyName = path[i];
 			PropertyDescriptor[] propDescs;
@@ -102,8 +103,8 @@ public class ChartServiceImpl extends RemoteServiceServlet implements ChartServi
 					if (i == path.length - 1) {
 						if(instance == null){
 							if((clazz == Double.class) || (clazz == Integer.class)
-								|| (clazz == Float.class) || (clazz == Long.class))
-							val = new ChartValue(ts, Type.number);
+									|| (clazz == Float.class) || (clazz == Long.class))
+								val = new ChartValue(ts, Type.number);
 							if(clazz == Boolean.class)
 								val = new ChartValue(ts, Type.bool);
 							if(clazz == Date.class)
@@ -169,16 +170,18 @@ public class ChartServiceImpl extends RemoteServiceServlet implements ChartServi
 				if(!clazz.isAssignableFrom(candidate.getClass()))
 					return false;
 
-				if(startDate.compareTo(candidate.getReceivedTimestamp())>=0)
-					return false;
+				if(startDate != null)
+					if(startDate.compareTo(candidate.getReceivedTimestamp())>=0)
+						return false;
 
-				if(endDate.compareTo(candidate.getReceivedTimestamp())<=0)
-					return false;
+				if(endDate != null)
+					if(endDate.compareTo(candidate.getReceivedTimestamp())<=0)
+						return false;
 
-				if(deviceName != null){
+				if(deviceName != null)
 					if(candidate.getSourceAddress() != devAddress)
 						return false;
-				}
+				
 				return true;
 			}
 		};
@@ -195,8 +198,47 @@ public class ChartServiceImpl extends RemoteServiceServlet implements ChartServi
 		catch(NullPointerException ne){
 			//simply means there is no data	
 		}
-
+		logger.fine("Got "+retval.size()+" samples");
+		
 		retval.addAll(messagesset);
 		return retval;
+	}
+
+	@Override
+	public ArrayList<ChartConfiguration> getChartsConfiguration()
+			throws DataBaseException {
+		logger.fine("Loading charts from DB");
+		Query query = DBServiceImpl.getDB().query();
+		query.constrain(ChartConfiguration.class);
+		ArrayList<ChartConfiguration> ret = new ArrayList<ChartConfiguration>();
+		ObjectSet<ChartConfiguration> obs = query.execute();
+		ret.addAll(obs);
+		return ret;
+	}
+
+	@Override
+	public void addChartConfiguration(ChartConfiguration cf)
+			throws DataBaseException {
+		DBServiceImpl.getDB().store(cf);
+		DBServiceImpl.getDB().commit();
+		logger.info("Added chart " + cf.getTitle());
+	}
+
+	@Override
+	public void updateChartConfiguration(ChartConfiguration oldcf,
+			ChartConfiguration newcf) throws DataBaseException {
+		removeChartConfiguration(oldcf);
+		addChartConfiguration(newcf);
+	}
+
+	@Override
+	public void removeChartConfiguration(ChartConfiguration cf)
+			throws DataBaseException {
+		ObjectSet<ChartConfiguration> os = DBServiceImpl.getDB().queryByExample(cf);
+		for(ChartConfiguration r : os){
+			logger.info("Removing chart "+r.getTitle());
+			DBServiceImpl.getDB().delete(r);
+			DBServiceImpl.getDB().commit();
+		}
 	}
 }

@@ -54,24 +54,6 @@ public class DashBoard extends Composite implements SectionChangeHandler{
 		stats.getElement().getStyle().setMargin(5, Unit.PX);
 		stats.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
 		panel.add(stats);		
-
-		ChartConfiguration cf = new ChartConfiguration();
-		cf.setStartDate(new Date(2014-1900, 10-1, 14));
-		cf.setEndDate(new Date(2014-1900, 10-1, 15));
-		cf.setType(ChartType.LINES);
-		cf.setValuesName("Temp (degrees)");
-		DataSetConfiguration dsc = new DataSetConfiguration();
-		dsc.setClassName(Hello.class.getName());
-		dsc.setDeviceName("Gardenino");
-		dsc.setPropertyName("temperature");
-		cf.getDatasets().add(dsc);
-		
-		LinesChart chart = new LinesChart(500, 330, cf);
-		chart.getElement().getStyle().setMargin(5, Unit.PX);
-		chart.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-		chart.setWidth("500px");
-		chart.setHeight("330px");
-		panel.add(chart);
 		
 		initWidget(panel);
 	}

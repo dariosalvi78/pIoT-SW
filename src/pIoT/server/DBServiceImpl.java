@@ -286,13 +286,4 @@ public class DBServiceImpl extends RemoteServiceServlet implements DBService{
 			getDB().delete(m);
 	}
 
-	public static ArrayList<Rule> getRules() throws DataBaseException{
-		Query query = getDB().query();
-		query.constrain(Rule.class);
-		ObjectSet<Rule> obset = query.execute(); 
-		ArrayList<Rule> rules = new ArrayList<Rule>();
-		rules.addAll(obset);
-		return rules;
-	}
-
 }

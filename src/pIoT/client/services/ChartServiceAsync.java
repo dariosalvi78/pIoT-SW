@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 
 import pIoT.shared.ChartConfiguration;
 import pIoT.shared.ChartValue;
+import pIoT.shared.DataBaseException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -30,5 +31,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface ChartServiceAsync {
 
 	void getData(ChartConfiguration cf, AsyncCallback<LinkedHashMap<Long, ArrayList<ChartValue>>> callback);
+	
+	void getChartsConfiguration(AsyncCallback<ArrayList<ChartConfiguration>> callback);
+
+	void addChartConfiguration(ChartConfiguration cf, AsyncCallback<Void> callback);
+	
+	void updateChartConfiguration(ChartConfiguration oldcf, ChartConfiguration newcf, AsyncCallback<Void> callback);
+	
+	void removeChartConfiguration(ChartConfiguration cf, AsyncCallback<Void> callback);
 
 }

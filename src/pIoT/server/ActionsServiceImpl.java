@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package pIoT.server;
 
@@ -29,16 +29,16 @@ import pIoT.shared.notifications.Notification;
 public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsService {
 
 	private static Logger logger = Logger.getLogger(ActionsServiceImpl.class.getName());
-	
+
 	private static ArrayList<ActionMessage> exampleActionMessages = new ArrayList<ActionMessage>();
 
 	public ActionsServiceImpl() {
 		//ADD HERE EXAMPLES
 		exampleActionMessages.add(new SwitchSet(10, true));
-		
+
 		//MY STUFF
 		exampleActionMessages.add(new ColorSet(10, 255, 100, 0, 10, 5000, 2));
-		
+
 		logger.info("Action service started");
 	}
 
@@ -60,7 +60,7 @@ public class ActionsServiceImpl extends RemoteServiceServlet implements ActionsS
 		q.constrain(Notification.class);
 		q.descend("message").constrain(not.getMessage());
 		q.descend("fixed").constrain(false);
-		
+
 		if(q.execute().size() ==0){
 			//No similar notification, then set the timestamp back and save
 			logger.info("Storing notification: "+not.getMessage());

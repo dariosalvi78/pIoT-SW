@@ -40,5 +40,17 @@ public interface ChartService extends RemoteService  {
 	 */
 	LinkedHashMap<Long, ArrayList<ChartValue>> getData(ChartConfiguration cf) throws DataBaseException, IllegalArgumentException;
 	
-
+	/**
+	 * Gives the configuration of the charts defined by the user to be 
+	 * shown in home page.
+	 * @return an array of {@link ChartConfiguration}
+	 * @throws DataBaseException
+	 */
+	ArrayList<ChartConfiguration> getChartsConfiguration() throws DataBaseException;
+	
+	void addChartConfiguration(ChartConfiguration cf) throws DataBaseException;
+	
+	void updateChartConfiguration(ChartConfiguration oldcf, ChartConfiguration newcf) throws DataBaseException;
+	
+	void removeChartConfiguration(ChartConfiguration cf) throws DataBaseException;
 }

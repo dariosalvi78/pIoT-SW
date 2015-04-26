@@ -49,7 +49,6 @@ public class LinesChart extends DockLayoutPanel {
 
 	public LinesChart(final int width, final int height, final ChartConfiguration cf) {
 		super(Unit.PX);
-
 		config = cf;
 
 		final DecoratorPanel frame = new DecoratorPanel();
@@ -66,6 +65,7 @@ public class LinesChart extends DockLayoutPanel {
 
 			@Override
 			public void run() {
+				logger.info("API loaded");
 				final Anchor startDate = new Anchor();
 				final DatePicker startDatePicker = new DatePicker();
 				final PopupPanel startDatepopup = new PopupPanel(true);
@@ -81,7 +81,9 @@ public class LinesChart extends DockLayoutPanel {
 						draw();
 					}
 				});
-				startDatePicker.setValue(cf.getStartDate(), true);
+				if(cf.getStartDate()!= null)
+					startDatePicker.setValue(cf.getStartDate(), true);
+				else startDatePicker.setValue(new Date(), true);
 				
 				startDate.addClickHandler(new ClickHandler() {
 					@Override
@@ -113,7 +115,9 @@ public class LinesChart extends DockLayoutPanel {
 						draw();
 					}
 				});
-				endDatePicker.setValue(cf.getEndDate(), true);
+				if(cf.getEndDate() != null)
+					endDatePicker.setValue(cf.getEndDate(), true);
+				else endDatePicker.setValue(new Date(), true);
 				
 				endDate.addClickHandler(new ClickHandler() {
 					@Override
@@ -149,6 +153,10 @@ public class LinesChart extends DockLayoutPanel {
 
 			@Override
 			public void onSuccess(LinkedHashMap<Long, ArrayList<ChartValue>> result) {
+				logger.finer("Got data to plot "+result.size());
+				if(result.size() == 0)
+					return;
+				
 				final ArrayList<ChartValue> samples = result.get( result.keySet().iterator().next() );
 				for(int k=0; k<samples.size(); k++){
 					if(samples.get(k).getType() == Type.number)

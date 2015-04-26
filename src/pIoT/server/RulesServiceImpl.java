@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import com.db4o.ObjectSet;
 import com.db4o.query.Predicate;
+import com.db4o.query.Query;
 import com.db4o.query.QueryComparator;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -97,6 +98,7 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		addSupportedClass(SwitchSet.class);
 		addSupportedClass(LightState.class);
 
+
 		//load static rules
 		new StaticRules();
 
@@ -104,8 +106,10 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		engine = new Engine();
 		//load all rules from DB
 		log.fine("Loading rules from DB");
-		ArrayList<Rule> rules = DBServiceImpl.getRules();
-		for(Rule r : rules){
+		Query query = DBServiceImpl.getDB().query();
+		query.constrain(Rule.class);
+		ObjectSet<Rule> obset = query.execute(); 
+		for(Rule r : obset){
 			parseRule(r);
 		}
 		variableCounter = 0;

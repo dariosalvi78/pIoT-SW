@@ -32,8 +32,6 @@
 	<set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED" />
 	<set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
-	<set-property name="gwt.logging.firebugHandler" value="DISABLED" />
 
 	<!-- Specify the app entry point class. -->
 	<entry-point class='pIoT.client.pIoTsever' />

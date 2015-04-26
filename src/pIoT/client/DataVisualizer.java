@@ -21,6 +21,8 @@ import java.util.List;
 import org.dt.reflector.client.PropertyUtils;
 import org.dt.reflector.client.Reflector;
 
+import pIoT.client.charts.Plotter;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -72,11 +74,11 @@ public class DataVisualizer {
 	public static Widget renderObject(Object object, 
 			boolean editable, boolean allowplot, String exportlink,
 			String setButtonText, String deleteButtonText, UpdateDeleteHandler handler){
-		return renderObject(object, editable, allowplot, exportlink, setButtonText, deleteButtonText, handler, new ArrayList<Runnable>());
+		return renderObject(object, editable, allowplot, exportlink, object.getClass().getName()+"/", setButtonText, deleteButtonText, handler, new ArrayList<Runnable>());
 	}
 
 	private static Widget renderObject(final Object object, 
-			boolean editable, boolean allowplot, String exportLink,
+			boolean editable, boolean allowplot, String exportLink, String plotlink,
 			String setButtonText, String deleteButtonText,
 			final UpdateDeleteHandler handler, final ArrayList<Runnable> fieldchangers){
 		DecoratorPanel decP = new DecoratorPanel();
@@ -91,7 +93,7 @@ public class DataVisualizer {
 		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
 		layout.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
 
-		int lastrow = setFieldRows(layout, object, editable, allowplot, exportLink, fieldchangers);
+		int lastrow = setFieldRows(layout, object, editable, allowplot, exportLink, plotlink, fieldchangers);
 
 		if((editable) && (setButtonText != null) && (handler != null)){
 			Button setButton = new Button(setButtonText);
@@ -127,7 +129,7 @@ public class DataVisualizer {
 
 
 	private static int setFieldRows(FlexTable layout, final Object object, 
-			boolean editable, boolean allowplot, String exportlink,
+			boolean editable, boolean allowplot, String exportlink, String plotlink,
 			final ArrayList<Runnable> fieldchangers){
 		int fieldN = 1;
 
@@ -156,7 +158,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName);
+						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName, plotlink+"."+fieldName);
 						dp.setContent(md.getWidget());
 						fieldchangers.add(new Runnable() {
 							@Override
@@ -172,7 +174,7 @@ public class DataVisualizer {
 					} else{ //short text
 						layout.setHTML(fieldN, 0, fieldName);
 
-						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName);
+						final BasicTypeModifier md = renderBasicType(fieldValue, edit, false, exportlink+"."+fieldName, plotlink+"."+fieldName);
 						layout.setWidget(fieldN, 1, md.getWidget());
 						fieldchangers.add(new Runnable() {
 							@Override
@@ -189,7 +191,7 @@ public class DataVisualizer {
 					boolean plot = allowplot;
 					if(fieldName.equalsIgnoreCase("sourceAddress"))
 						plot = false;
-					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot, exportlink+"."+fieldName);
+					final BasicTypeModifier md = renderBasicType(fieldValue, editable, plot, exportlink+"."+fieldName, plotlink+"."+fieldName);
 					layout.setWidget(fieldN, 1, md.getWidget());
 					fieldchangers.add(new Runnable() {
 						@Override
@@ -220,7 +222,7 @@ public class DataVisualizer {
 							if(isBasic(element)){
 								layout.setHTML(fieldN, 0, fieldName+"["+ i + "]");
 
-								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName);
+								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName, plotlink+"."+fieldName);
 								layout.setWidget(fieldN, 1, md.getWidget());
 								fieldchangers.add(new Runnable() {
 									@Override
@@ -236,7 +238,7 @@ public class DataVisualizer {
 								DisclosurePanel dp = new DisclosurePanel(fieldName+"["+ i + "]");
 								dp.setAnimationEnabled(true);
 
-								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName);
+								final BasicTypeModifier md = renderBasicType(element, editable, allowplot, exportlink+"."+fieldName, plotlink+"."+fieldName);
 								dp.setContent(md.getWidget());
 								fieldchangers.add(new Runnable() {
 									@Override
@@ -259,7 +261,7 @@ public class DataVisualizer {
 						DisclosurePanel dp = new DisclosurePanel(fieldName);
 						dp.setAnimationEnabled(true);
 
-						dp.setContent(renderObject(fieldValue, editable, allowplot, exportlink+"."+fieldName, null, null, null, fieldchangers));
+						dp.setContent(renderObject(fieldValue, editable, allowplot, exportlink+"."+fieldName, plotlink +"."+fieldName, null, null, null, fieldchangers));
 
 						layout.setWidget(fieldN, 0, dp);
 						layout.getFlexCellFormatter().setColSpan(fieldN, 0, 2);
@@ -291,7 +293,7 @@ public class DataVisualizer {
 				(o instanceof Boolean);
 	}
 
-	private static BasicTypeModifier renderBasicType(final Object value, boolean editable, boolean allowplot, String exportlink){
+	private static BasicTypeModifier renderBasicType(final Object value, boolean editable, boolean allowplot, String exportlink, final String plotlink){
 
 		if(value instanceof String) { //String
 			final String text = (String) value;
@@ -382,11 +384,30 @@ public class DataVisualizer {
 			}
 			tb.setReadOnly(!editable);
 			hp.add(tb);
-			if(allowplot){ //TODO: do something with plots
+			if(allowplot){
 				Anchor export = new Anchor("export");
 				export.setHref(exportlink);
 				export.getElement().getStyle().setMarginLeft(5, Unit.PX);
 				hp.add(export);
+				
+				Anchor plot = new Anchor("plot");
+				plot.addClickHandler(new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent event) {
+						int width = (int) (Window.getClientWidth() *0.8F);
+						int x = Window.getClientWidth()/2 -width/2;
+						int height = (int) (Window.getClientHeight() *0.8F);
+						int y = Window.getClientHeight()/2 -height/2;
+						Plotter p = new Plotter(plotlink, width, height);
+						p.setWidth(width+"px");
+						p.setHeight(height+"px");
+						p.setPopupPosition(x, y);
+						p.show();
+					}
+				});
+				plot.getElement().getStyle().setMarginLeft(5, Unit.PX);
+				hp.add(plot);
 			}
 			return new BasicTypeModifier() {
 				@Override
