@@ -98,7 +98,6 @@ public class RulesServiceImpl extends RemoteServiceServlet implements RulesServi
 		addSupportedClass(SwitchSet.class);
 		addSupportedClass(LightState.class);
 
-
 		//load static rules
 		new StaticRules();
 

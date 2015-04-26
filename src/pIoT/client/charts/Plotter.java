@@ -10,6 +10,7 @@ import pIoT.shared.ChartConfiguration;
 import pIoT.shared.ChartConfiguration.ChartType;
 import pIoT.shared.DataSetConfiguration;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -53,6 +54,8 @@ public class Plotter  extends PopupPanel {
 		setWidget(getContent());
 	}
 	
+
+	
 	Widget getContent(){
 		final VerticalPanel vp = new VerticalPanel();
 		
@@ -65,6 +68,7 @@ public class Plotter  extends PopupPanel {
 		
 		for(ChartConfiguration.ChartType t : ChartConfiguration.ChartType.values())
 			typeBox.addItem(t.name());
+		typeBox.getElement().getStyle().setMarginLeft(20, Unit.PX);
 		header.add(typeBox);
 		typeBox.addChangeHandler(new ChangeHandler() {
 			
@@ -83,13 +87,18 @@ public class Plotter  extends PopupPanel {
 		});
 		
 		Button addToDash = new Button("Add to dashboard");
+		addToDash.getElement().getStyle().setMarginLeft(20, Unit.PX);
+		//TODO: implement the onclick
 		header.add(addToDash);
+		vp.add(header);
 		
 		Widget plot = null;
 		String type = typeBox.getItemText(typeBox.getSelectedIndex());
 		if(type.equals(ChartType.LINES.name())){
 			logger.finer("Plotting Lines");
-			plot = new LinesChart(width-30, heigth-30, config);
+			plot = new LinesChart(width-10, heigth-10, config);
+			plot.setWidth(width+"px");
+			plot.setHeight(heigth+"px");
 		}
 		
 		vp.add(plot);

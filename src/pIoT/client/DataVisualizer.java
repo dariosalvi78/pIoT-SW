@@ -403,6 +403,7 @@ public class DataVisualizer {
 						p.setWidth(width+"px");
 						p.setHeight(height+"px");
 						p.setPopupPosition(x, y);
+						p.setAnimationEnabled(true);
 						p.show();
 					}
 				});

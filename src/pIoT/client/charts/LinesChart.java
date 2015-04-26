@@ -65,7 +65,7 @@ public class LinesChart extends DockLayoutPanel {
 
 			@Override
 			public void run() {
-				logger.info("API loaded");
+				logger.info("GWT Charts API loaded");
 				final Anchor startDate = new Anchor();
 				final DatePicker startDatePicker = new DatePicker();
 				final PopupPanel startDatepopup = new PopupPanel(true);
