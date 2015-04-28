@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="test-classes" path="test"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/jssc.jar"/>
 	<classpathentry kind="lib" path="libs/db4o-8.0.249.16098-all-java5.jar" sourcepath="D:/Libraries/Java/db4o-8.0/src">
@@ -14,5 +13,6 @@
 	<classpathentry kind="lib" path="libs/mvel2-2.2.0.Final.jar"/>
 	<classpathentry kind="lib" path="libs/gwt-charts-0.9.9.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

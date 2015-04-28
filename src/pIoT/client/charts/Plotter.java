@@ -57,6 +57,7 @@ public class Plotter  extends PopupPanel {
 
 	
 	Widget getContent(){
+		logger.finer("Plotting Lines");
 		final VerticalPanel vp = new VerticalPanel();
 		
 		HorizontalPanel header = new HorizontalPanel();
@@ -78,7 +79,6 @@ public class Plotter  extends PopupPanel {
 				Widget plot = null;
 				String type = typeBox.getItemText(typeBox.getSelectedIndex());
 				if(type.equals(ChartType.LINES.name())){
-					logger.finer("Plotting Lines");
 					plot = new LinesChart(width-30, heigth-30, config);
 				}
 				
@@ -95,7 +95,6 @@ public class Plotter  extends PopupPanel {
 		Widget plot = null;
 		String type = typeBox.getItemText(typeBox.getSelectedIndex());
 		if(type.equals(ChartType.LINES.name())){
-			logger.finer("Plotting Lines");
 			plot = new LinesChart(width-10, heigth-10, config);
 			plot.setWidth(width+"px");
 			plot.setHeight(heigth+"px");

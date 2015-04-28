@@ -15,6 +15,7 @@
 	<inherits name='com.google.gwt.user.theme.clean.Clean' />
 
 	<inherits name='org.dt.reflector.Reflector' />
+	<inherits name="com.googlecode.gwt.charts.Charts"/> 
 
 	<entry-point class='pIoT.client.pIoTsever' />
 
